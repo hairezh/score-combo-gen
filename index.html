@@ -24,11 +24,9 @@
       --pink1: rgba(255, 86, 168, .18);
       --pink2: rgba(255, 140, 215, .12);
       --pink3: rgba(210, 80, 255, .10);
-      --accent: rgba(255, 120, 200, .22);
       --btn: rgba(255, 120, 200, .22);
       --btnHover: rgba(255, 120, 200, .28);
 
-      /* background dimming */
       --bgDim: .35;
     }
 
@@ -40,10 +38,9 @@
       font-family:var(--sans);
       color:var(--fg);
       background:#08070a;
-      overflow:hidden; /* no page scroll */
+      overflow:hidden;
     }
 
-    /* Background image + dim */
     body::before{
       content:"";
       position:fixed;
@@ -58,7 +55,6 @@
       z-index:-2;
     }
 
-    /* Pink glow layer (no green/blue) */
     body::after{
       content:"";
       position:fixed;
@@ -97,7 +93,7 @@
       gap:12px;
     }
     @media (max-width: 980px){
-      body{overflow:auto}          /* allow page scroll on small screens */
+      body{overflow:auto}
       .app{height:auto; min-height:100vh}
       .grid{grid-template-columns:1fr}
     }
@@ -124,13 +120,11 @@
     }
     .hd b{font-size:12.5px}
 
-    /* Settings can scroll if needed */
     .bd{
       padding:12px;
       overflow:auto;
     }
 
-    /* Preview must be locked (no scroll) */
     .bd.preview{
       overflow:hidden !important;
       display:flex;
@@ -192,7 +186,6 @@
     .status{margin-top:8px;font-size:11.5px;color:var(--muted)}
     .status b{color:var(--fg)}
 
-    /* Preview panels side-by-side */
     .previewSplit{
       flex:1;
       min-height:0;
@@ -224,7 +217,6 @@
     .pvh .t{font-size:12px;font-weight:900}
     .pvh .s{font-size:11.2px;color:var(--muted)}
 
-    /* LOCKED PREVIEW BODY: no scroll */
     .pvb{
       padding:10px 12px;
       overflow:hidden;
@@ -234,7 +226,6 @@
       align-items:flex-start;
     }
 
-    /* Compact thumb grid to fit without scrolling */
     .thumbs{
       width:100%;
       display:grid;
@@ -243,7 +234,6 @@
       justify-items:stretch;
     }
 
-    /* Desktop: Score needs 14 items → 7 cols x 2 rows. Combo: 10 items → 5 cols x 2 rows */
     .thumbs.score{grid-template-columns: repeat(7, minmax(0, 1fr));}
     .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
 
@@ -353,7 +343,7 @@
 
           <div class="row">
             <div>
-              <label>Score: size / color</label>
+              <label>Score: normal size / color</label>
               <div class="row" style="gap:8px">
                 <input id="scoreSize" type="number" min="1" step="1" value="52" />
                 <input id="scoreColor" type="text" value="#FFFFFF" />
@@ -366,7 +356,7 @@
             </div>
 
             <div>
-              <label>Combo: size / color</label>
+              <label>Combo: normal size / color</label>
               <div class="row" style="gap:8px">
                 <input id="comboSize" type="number" min="1" step="1" value="52" />
                 <input id="comboColor" type="text" value="#FFFFFF" />
@@ -381,10 +371,24 @@
 
           <div class="sep"></div>
 
+          <div class="row">
+            <div>
+              <label>My-style score size</label>
+              <input id="myScoreSize" type="number" min="1" step="1" value="34" />
+              <div class="tiny">Only affects my-style score.</div>
+            </div>
+            <div>
+              <label>My-style uses</label>
+              <input type="text" value="Score only (no combo)" readonly />
+              <div class="tiny">my-style exports only score folder.</div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
           <button id="btnDownload" class="btn">Download Archives</button>
 
           <div class="status" id="status">Status: <b>ready</b>.</div>
-          <div class="tiny"></div>
         </div>
       </section>
 
@@ -425,7 +429,7 @@
 
           <div class="tiny" style="margin-top:0">
             Preview always shows the <span style="font-family:var(--mono)">img @2x</span> set only.
-            (ZIP still includes <span style="font-family:var(--mono)">normal 1x</span> and <span style="font-family:var(--mono)">my-style</span>.)
+            (ZIP includes <span style="font-family:var(--mono)">normal 1x</span> and <span style="font-family:var(--mono)">my-style</span>.)
           </div>
         </div>
       </section>
@@ -468,6 +472,8 @@
     comboColor: $('comboColor'),
     comboOffX: $('comboOffX'),
     comboOffY: $('comboOffY'),
+
+    myScoreSize: $('myScoreSize'),
 
     btnDownload: $('btnDownload'),
     status: $('status'),
@@ -565,8 +571,15 @@
     }
   }
 
-  // NEW: supports a per-glyph override for my-style (e.g. percent -> 1000x1 empty)
-  function renderNormalAndMy({prefix, family, size, color, ox, oy, nW, nH, mySize, myPad, glyphs, keyForGlyph, myOverrides}){
+  // Supports: myTextSize (separate size for my-style) and per-glyph overrides.
+  function renderNormalAndMy({
+    prefix, family,
+    normalTextSize, myTextSize,
+    color, ox, oy,
+    nW, nH, mySize, myPad,
+    glyphs, keyForGlyph,
+    myOverrides
+  }){
     const pref = sanitizePrefix(prefix);
 
     const normal2x = new Map();
@@ -580,25 +593,24 @@
       const c2 = makeCanvas(nW,nH);
       const ctx2 = c2.getContext('2d');
       clear(ctx2,nW,nH);
-      drawCentered(ctx2, g, nW,nH, family, size, color, ox, oy);
+      drawCentered(ctx2, g, nW,nH, family, normalTextSize, color, ox, oy);
 
       const c1 = downscale(c2, Math.round(nW/2), Math.round(nH/2));
       normal2x.set(`${pref}${key}@2x.png`, c2);
       normal1x.set(`${pref}${key}.png`, c1);
 
-      // my-style (with overrides)
+      // my-style
       const ov = myOverrides?.[key] || null;
 
       if(ov?.type === 'empty'){
-        const ce = makeCanvas(ov.w, ov.h);
-        // leave fully transparent
+        const ce = makeCanvas(ov.w, ov.h); // fully transparent
         my.set(`${pref}${key}.png`, ce);
       } else {
         const S = mySize;
         const cm = makeCanvas(S,S);
         const ctxm = cm.getContext('2d');
         clear(ctxm,S,S);
-        drawTopRight(ctxm, g, S,S, family, size, color, myPad, ox, oy);
+        drawTopRight(ctxm, g, S,S, family, myTextSize, color, myPad, ox, oy);
         my.set(`${pref}${key}.png`, cm);
       }
     }
@@ -622,7 +634,8 @@
     const score = renderNormalAndMy({
       prefix: el.scorePrefix.value,
       family: fontScore,
-      size: parseInt(el.scoreSize.value||'52',10),
+      normalTextSize: parseInt(el.scoreSize.value||'52',10),
+      myTextSize: parseInt(el.myScoreSize.value||'34',10),
       color: (el.scoreColor.value||'#fff').trim(),
       ox: parseInt(el.scoreOffX.value||'0',10),
       oy: parseInt(el.scoreOffY.value||'0',10),
@@ -630,7 +643,7 @@
       glyphs: SCORE_GLYPHS,
       keyForGlyph: scoreKeyForGlyph,
       myOverrides: {
-        // score-percent: always 1000x1 empty transparent in my-style
+        // score-percent in my-style: always 1000x1 EMPTY transparent
         percent: { type:'empty', w:1000, h:1 }
       }
     });
@@ -638,13 +651,13 @@
     const combo = renderNormalAndMy({
       prefix: el.comboPrefix.value,
       family: fontCombo,
-      size: parseInt(el.comboSize.value||'52',10),
+      normalTextSize: parseInt(el.comboSize.value||'52',10),
+      myTextSize: parseInt(el.comboSize.value||'52',10), // not used for export (my-style doesn't include combo), but harmless
       color: (el.comboColor.value||'#fff').trim(),
       ox: parseInt(el.comboOffX.value||'0',10),
       oy: parseInt(el.comboOffY.value||'0',10),
       nW, nH, mySize, myPad,
       glyphs: COMBO_GLYPHS
-      // no overrides needed for preview
     });
 
     fillPreview(el.pvScore, score.normal2x);
@@ -676,7 +689,8 @@
       const score = renderNormalAndMy({
         prefix: el.scorePrefix.value,
         family: fontScore,
-        size: parseInt(el.scoreSize.value||'52',10),
+        normalTextSize: parseInt(el.scoreSize.value||'52',10),
+        myTextSize: parseInt(el.myScoreSize.value||'34',10),
         color: (el.scoreColor.value||'#fff').trim(),
         ox: parseInt(el.scoreOffX.value||'0',10),
         oy: parseInt(el.scoreOffY.value||'0',10),
@@ -684,7 +698,6 @@
         glyphs: SCORE_GLYPHS,
         keyForGlyph: scoreKeyForGlyph,
         myOverrides: {
-          // score-percent: always 1000x1 empty transparent in my-style
           percent: { type:'empty', w:1000, h:1 }
         }
       });
@@ -692,7 +705,8 @@
       const combo = renderNormalAndMy({
         prefix: el.comboPrefix.value,
         family: fontCombo,
-        size: parseInt(el.comboSize.value||'52',10),
+        normalTextSize: parseInt(el.comboSize.value||'52',10),
+        myTextSize: parseInt(el.comboSize.value||'52',10),
         color: (el.comboColor.value||'#fff').trim(),
         ox: parseInt(el.comboOffX.value||'0',10),
         oy: parseInt(el.comboOffY.value||'0',10),
@@ -702,13 +716,14 @@
 
       const zip = new JSZip();
 
+      // normal includes score + combo (both @2x and 1x)
       const normal = zip.folder('normal');
       for(const [name, canvas] of score.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
       for(const [name, canvas] of score.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
       for(const [name, canvas] of combo.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
       for(const [name, canvas] of combo.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
 
-      // UPDATED: my-style contains ONLY score (no combo folder)
+      // my-style includes ONLY score
       const my = zip.folder('my-style');
       const myScore = my.folder('score');
       for(const [name, canvas] of score.my.entries()) myScore.file(name, await canvasToBlob(canvas));
@@ -754,7 +769,8 @@
     'scorePrefix','comboPrefix','scoreFont','comboFont',
     'nW','nH','mySize','myPad',
     'scoreSize','scoreColor','scoreOffX','scoreOffY',
-    'comboSize','comboColor','comboOffX','comboOffY'
+    'comboSize','comboColor','comboOffX','comboOffY',
+    'myScoreSize'
   ];
   watch.forEach(id => $(id).addEventListener('input', schedulePreview));
   $('scoreFont').addEventListener('change', schedulePreview);

@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="https://i.pinimg.com/1200x/7e/ec/b7/7eecb7ec1af9c6e2a0512df28558b2cd.jpg">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>osu!mania — Score/Combo Archives</title>
@@ -11,21 +10,66 @@
 
   <style>
     :root{
-      --bg:#0b0c0f; --fg:#ececec; --muted:rgba(255,255,255,.65);
-      --border:rgba(255,255,255,.12); --panel:rgba(255,255,255,.06);
-      --r:14px; --shadow:0 18px 55px rgba(0,0,0,.55);
+      --fg:#f6f0f7;
+      --muted:rgba(255,255,255,.68);
+      --border:rgba(255,255,255,.12);
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.03);
+      --shadow:0 18px 55px rgba(0,0,0,.55);
+      --r:14px;
       --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
       --sans: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Apple Color Emoji","Segoe UI Emoji";
+
+      --pink1: rgba(255, 86, 168, .18);
+      --pink2: rgba(255, 140, 215, .12);
+      --pink3: rgba(210, 80, 255, .10);
+      --accent: rgba(255, 120, 200, .22);
+      --btn: rgba(255, 120, 200, .22);
+      --btnHover: rgba(255, 120, 200, .28);
+
+      /* background dimming */
+      --bgDim: .35;
     }
+
     *{box-sizing:border-box}
     html,body{height:100%}
+
     body{
-      margin:0; font-family:var(--sans); color:var(--fg);
-      background:
-        radial-gradient(1200px 900px at 20% 10%, rgba(120,110,255,.14), transparent 55%),
-        radial-gradient(900px 700px at 85% 25%, rgba(0,255,210,.10), transparent 60%),
-        var(--bg);
+      margin:0;
+      font-family:var(--sans);
+      color:var(--fg);
+      background:#08070a;
+      overflow:hidden; /* no page scroll */
     }
+
+    /* Background image + dim */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.80)),
+        url("https://wallpapercave.com/wp/wp7789919.jpg");
+      background-size:cover;
+      background-position:center;
+      filter: brightness(var(--bgDim)) saturate(1.05);
+      transform: translateZ(0);
+      z-index:-2;
+    }
+
+    /* Pink glow layer (no green/blue) */
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(1200px 900px at 18% 12%, var(--pink1), transparent 58%),
+        radial-gradient(900px 700px at 78% 26%, var(--pink2), transparent 62%),
+        radial-gradient(1000px 800px at 55% 88%, var(--pink3), transparent 60%);
+      z-index:-1;
+      pointer-events:none;
+    }
+
     .app{
       height:100vh;
       display:flex;
@@ -33,11 +77,17 @@
       padding:14px;
       gap:12px;
     }
+
     header{
-      display:flex; align-items:flex-end; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
     }
     h1{margin:0;font-size:15px;letter-spacing:.2px}
     .sub{color:var(--muted);font-size:12px;line-height:1.35}
+
     .grid{
       flex:1;
       min-height:0;
@@ -46,27 +96,50 @@
       gap:12px;
     }
     @media (max-width: 980px){
+      body{overflow:auto}          /* allow page scroll on small screens */
+      .app{height:auto; min-height:100vh}
       .grid{grid-template-columns:1fr}
     }
+
     .card{
       min-height:0;
-      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      background:linear-gradient(180deg, var(--panel), var(--panel2));
       border:1px solid var(--border);
       border-radius:var(--r);
       box-shadow:var(--shadow);
       overflow:hidden;
       display:flex;
       flex-direction:column;
+      backdrop-filter: blur(10px);
     }
+
     .hd{
       padding:10px 12px;
       border-bottom:1px solid var(--border);
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
     }
     .hd b{font-size:12.5px}
-    .bd{padding:12px; overflow:auto}
+
+    /* Settings can scroll if needed */
+    .bd{
+      padding:12px;
+      overflow:auto;
+    }
+
+    /* Preview must be locked (no scroll) */
+    .bd.preview{
+      overflow:hidden !important;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:0;
+    }
+
     label{display:block;color:var(--muted);font-size:11.5px;margin-bottom:6px}
-    input[type="text"], input[type="number"], select{
+    input[type="text"], input[type="number"]{
       width:100%;
       padding:9px 10px;
       border-radius:12px;
@@ -76,13 +149,12 @@
       outline:none;
     }
 
-    /* File input: black button with white text */
     input[type="file"]{
       width:100%;
       padding:9px 10px;
       border-radius:12px;
       border:1px dashed var(--border);
-      background:rgba(0,0,0,.18);
+      background:rgba(0,0,0,.22);
       color:var(--muted);
     }
     input[type="file"]::file-selector-button{
@@ -93,7 +165,7 @@
       padding:7px 10px;
       margin-right:10px;
       cursor:pointer;
-      font-weight:700;
+      font-weight:800;
     }
     input[type="file"]::file-selector-button:hover{
       border-color:rgba(255,255,255,.32);
@@ -102,44 +174,112 @@
     .row{display:grid;grid-template-columns:1fr 1fr; gap:10px}
     .row3{display:grid;grid-template-columns:1fr 1fr 1fr; gap:10px}
     .sep{height:1px;background:var(--border);margin:10px 0}
+
     .btn{
       border:1px solid var(--border);
-      background:rgba(80,255,200,.18);
+      background:var(--btn);
       color:var(--fg);
       padding:10px 12px;
       border-radius:999px;
       cursor:pointer;
-      font-weight:800;
+      font-weight:900;
       width:100%;
     }
-    .btn:hover{background:rgba(80,255,200,.24)}
+    .btn:hover{background:var(--btnHover)}
+
     .tiny{margin-top:6px;font-size:11.2px;color:var(--muted);line-height:1.35}
     .status{margin-top:8px;font-size:11.5px;color:var(--muted)}
     .status b{color:var(--fg)}
+
+    /* Preview panels side-by-side */
+    .previewSplit{
+      flex:1;
+      min-height:0;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 980px){
+      .previewSplit{grid-template-columns:1fr}
+    }
+
     .pv{
       border:1px solid var(--border);
       border-radius:14px;
       overflow:hidden;
-      background:rgba(0,0,0,.18);
+      background:rgba(0,0,0,.20);
       display:flex;
       flex-direction:column;
       min-height:0;
     }
-    .pvh{padding:9px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .pvh .t{font-size:12px;font-weight:800}
-    .pvh .s{font-size:11.2px;color:var(--muted)}
-    .pvb{padding:10px 12px; overflow:auto}
-    .thumbs{display:grid;grid-template-columns: repeat(6, minmax(0, 1fr)); gap:10px}
-    @media (max-width: 520px){.thumbs{grid-template-columns: repeat(4, minmax(0, 1fr));}}
-    .thumb{
-      display:flex;flex-direction:column;align-items:center;gap:6px;
-      padding:8px;border-radius:12px;border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.03);
+    .pvh{
+      padding:9px 12px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
     }
-    .cap{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-align:center;word-break:break-word}
-    .hint{
-      padding:10px 12px;border-radius:14px;border:1px solid var(--border);
-      background:rgba(0,0,0,.18); color:var(--muted); font-size:12px; line-height:1.4;
+    .pvh .t{font-size:12px;font-weight:900}
+    .pvh .s{font-size:11.2px;color:var(--muted)}
+
+    /* LOCKED PREVIEW BODY: no scroll */
+    .pvb{
+      padding:10px 12px;
+      overflow:hidden;
+      flex:1;
+      min-height:0;
+      display:flex;
+      align-items:flex-start;
+    }
+
+    /* Compact thumb grid to fit without scrolling */
+    .thumbs{
+      width:100%;
+      display:grid;
+      gap:8px;
+      align-content:start;
+      justify-items:stretch;
+    }
+
+    /* Desktop: Score needs 14 items → 7 cols x 2 rows. Combo: 10 items → 5 cols x 2 rows */
+    .thumbs.score{grid-template-columns: repeat(7, minmax(0, 1fr));}
+    .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
+
+    @media (max-width: 1160px){
+      .thumbs.score{grid-template-columns: repeat(6, minmax(0, 1fr));}
+      .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
+    }
+    @media (max-width: 980px){
+      .thumbs.score{grid-template-columns: repeat(7, minmax(0, 1fr));}
+      .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
+    }
+    @media (max-width: 560px){
+      .thumbs.score{grid-template-columns: repeat(5, minmax(0, 1fr));}
+      .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
+    }
+
+    .thumb{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:5px;
+      padding:7px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.035);
+      text-align:center;
+    }
+    .thumb canvas{display:block}
+    .cap{
+      font-family:var(--mono);
+      font-size:10px;
+      color:var(--muted);
+      line-height:1.1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
     }
   </style>
 </head>
@@ -149,8 +289,8 @@
       <div>
         <h1>osu!mania — Score/Combo Archives (Font → PNG)</h1>
         <div class="sub">
-          Preview shows <span style="font-family:var(--mono)">@2x only</span>.
-          ZIP contains: <span style="font-family:var(--mono)">normal (@2x + 1x)</span> + <span style="font-family:var(--mono)">my-style</span>.
+          Preview is <span style="font-family:var(--mono)">@2x only</span> and locked (no scroll).
+          ZIP includes <span style="font-family:var(--mono)">normal (@2x + 1x)</span> + <span style="font-family:var(--mono)">my-style</span>.
         </div>
       </div>
     </header>
@@ -194,12 +334,12 @@
                 <input id="nW" type="number" min="1" step="1" value="44" />
                 <input id="nH" type="number" min="1" step="1" value="66" />
               </div>
-              <div class="tiny">1x is auto downscale to half.</div>
+              <div class="tiny">1x is auto-downscaled to half.</div>
             </div>
             <div>
               <label>My style canvas</label>
               <input id="mySize" type="number" min="1" step="1" value="350" />
-              <div class="tiny">Draws in top-right (clamped).</div>
+              <div class="tiny">Draw in top-right (clamped).</div>
             </div>
             <div>
               <label>My style padding</label>
@@ -244,13 +384,8 @@
           <div class="status" id="status">Status: <b>ready</b>.</div>
           <div class="tiny">
             ZIP layout:
-            <span style="font-family:var(--mono)">/normal/</span> (files for osu) +
+            <span style="font-family:var(--mono)">/normal/</span> (osu files) +
             <span style="font-family:var(--mono)">/my-style/</span> (350×350 variants)
-          </div>
-
-          <div class="hint" style="margin-top:10px">
-            If the ZIP button does nothing, your browser may have blocked CDN access.
-            Try opening the file with internet access, or ask me to embed JSZip directly into the HTML.
           </div>
         </div>
       </section>
@@ -259,29 +394,41 @@
       <section class="card">
         <div class="hd">
           <b>Preview (@2x only)</b>
-          <span class="tiny" style="margin:0">Normal shows 44×66 • My style shows 350×350</span>
+          <span class="tiny" style="margin:0">Static grid, no scroll</span>
         </div>
-        <div class="bd" style="display:grid; gap:10px; min-height:0">
-          <div class="pv">
-            <div class="pvh">
-              <div>
-                <div class="t">Score @2x</div>
-                <div class="s" id="infoScore">—</div>
+
+        <div class="bd preview">
+          <div class="previewSplit">
+            <div class="pv">
+              <div class="pvh">
+                <div>
+                  <div class="t">Score @2x</div>
+                  <div class="s" id="infoScore">—</div>
+                </div>
+                <div class="s" id="tagScore">Normal @2x</div>
               </div>
-              <div class="s" id="tagScore">—</div>
+              <div class="pvb">
+                <div class="thumbs score" id="pvScore"></div>
+              </div>
             </div>
-            <div class="pvb"><div class="thumbs" id="pvScore"></div></div>
+
+            <div class="pv">
+              <div class="pvh">
+                <div>
+                  <div class="t">Combo @2x</div>
+                  <div class="s" id="infoCombo">—</div>
+                </div>
+                <div class="s" id="tagCombo">Normal @2x</div>
+              </div>
+              <div class="pvb">
+                <div class="thumbs combo" id="pvCombo"></div>
+              </div>
+            </div>
           </div>
 
-          <div class="pv">
-            <div class="pvh">
-              <div>
-                <div class="t">Combo @2x</div>
-                <div class="s" id="infoCombo">—</div>
-              </div>
-              <div class="s" id="tagCombo">—</div>
-            </div>
-            <div class="pvb"><div class="thumbs" id="pvCombo"></div></div>
+          <div class="tiny" style="margin-top:0">
+            Preview always shows the <span style="font-family:var(--mono)">normal @2x</span> set only.
+            (ZIP still includes <span style="font-family:var(--mono)">normal 1x</span> and <span style="font-family:var(--mono)">my-style</span>.)
           </div>
         </div>
       </section>
@@ -292,11 +439,9 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  // Required glyph sets
   const SCORE_GLYPHS = ['1','2','3','4','5','6','7','8','9','0','.', '%', 'x', ','];
   const COMBO_GLYPHS = ['1','2','3','4','5','6','7','8','9','0'];
 
-  // osu-ish naming for special score glyphs
   const scoreKeyForGlyph = (g) => {
     if (g >= '0' && g <= '9') return g;
     if (g === '.') return 'dot';
@@ -386,7 +531,6 @@
     let x = (w - pad - tw) + ox;
     let y = (pad + asc) + oy;
 
-    // clamp inside canvas
     x = Math.max(0, Math.min(x, w - tw));
     y = Math.max(asc, Math.min(y, h - desc));
 
@@ -410,28 +554,30 @@
     for(const [name, canvas] of map.entries()){
       const box = document.createElement('div');
       box.className = 'thumb';
+
       const c = makeCanvas(canvas.width, canvas.height);
       c.getContext('2d').drawImage(canvas,0,0);
       box.appendChild(c);
+
       const cap = document.createElement('div');
       cap.className = 'cap';
-      cap.textContent = name.replace(/^.*\//,''); // show file only
+      cap.textContent = name;
       box.appendChild(cap);
+
       container.appendChild(box);
     }
   }
 
-  function renderNormalAndMy({prefix, family, size, color, ox, oy, nW, nH, mySize, myPad, glyphs, keyForGlyph, isScore}){
+  function renderNormalAndMy({prefix, family, size, color, ox, oy, nW, nH, mySize, myPad, glyphs, keyForGlyph}){
     const pref = sanitizePrefix(prefix);
 
-    const normal2x = new Map(); // filename -> canvas
-    const normal1x = new Map(); // filename -> canvas
-    const my = new Map();       // filename -> canvas
+    const normal2x = new Map();
+    const normal1x = new Map();
+    const my = new Map();
 
     for(const g of glyphs){
       const key = keyForGlyph ? keyForGlyph(g) : g;
 
-      // Normal
       const c2 = makeCanvas(nW,nH);
       const ctx2 = c2.getContext('2d');
       clear(ctx2,nW,nH);
@@ -439,11 +585,9 @@
 
       const c1 = downscale(c2, Math.round(nW/2), Math.round(nH/2));
 
-      // keep osu-friendly names in /normal root
       normal2x.set(`${pref}${key}@2x.png`, c2);
       normal1x.set(`${pref}${key}.png`, c1);
 
-      // My style (in /my-style to avoid conflicts)
       const S = mySize;
       const cm = makeCanvas(S,S);
       const ctxm = cm.getContext('2d');
@@ -477,8 +621,7 @@
       oy: parseInt(el.scoreOffY.value||'0',10),
       nW, nH, mySize, myPad,
       glyphs: SCORE_GLYPHS,
-      keyForGlyph: scoreKeyForGlyph,
-      isScore: true
+      keyForGlyph: scoreKeyForGlyph
     });
 
     const combo = renderNormalAndMy({
@@ -492,7 +635,7 @@
       glyphs: COMBO_GLYPHS
     });
 
-    // Preview shows @2x only (normal @2x)
+    // locked preview: normal @2x only
     fillPreview(el.pvScore, score.normal2x);
     fillPreview(el.pvCombo, combo.normal2x);
 
@@ -544,34 +687,18 @@
 
       const zip = new JSZip();
 
-      // /normal: osu-friendly files (root of that folder)
       const normal = zip.folder('normal');
-      // score normal
-      for(const [name, canvas] of score.normal2x.entries()){
-        normal.file(name, await canvasToBlob(canvas));
-      }
-      for(const [name, canvas] of score.normal1x.entries()){
-        normal.file(name, await canvasToBlob(canvas));
-      }
-      // combo normal
-      for(const [name, canvas] of combo.normal2x.entries()){
-        normal.file(name, await canvasToBlob(canvas));
-      }
-      for(const [name, canvas] of combo.normal1x.entries()){
-        normal.file(name, await canvasToBlob(canvas));
-      }
+      for(const [name, canvas] of score.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of score.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of combo.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of combo.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
 
-      // /my-style: 350×350 variants (kept separate to avoid filename collisions)
       const my = zip.folder('my-style');
       const myScore = my.folder('score');
       const myCombo = my.folder('combo');
 
-      for(const [name, canvas] of score.my.entries()){
-        myScore.file(name, await canvasToBlob(canvas));
-      }
-      for(const [name, canvas] of combo.my.entries()){
-        myCombo.file(name, await canvasToBlob(canvas));
-      }
+      for(const [name, canvas] of score.my.entries()) myScore.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of combo.my.entries()) myCombo.file(name, await canvasToBlob(canvas));
 
       setStatus('zipping');
 
@@ -593,7 +720,7 @@
     }
   }
 
-  // Live preview updates (fast): rerender normal @2x only
+  // Debounced live preview (still no scroll)
   let debounceT = null;
   function schedulePreview(){
     clearTimeout(debounceT);
@@ -606,13 +733,11 @@
         console.error(e);
         setStatus('error (check console)');
       }
-    }, 150);
+    }, 160);
   }
 
-  // Bindings
   el.btnDownload.addEventListener('click', downloadArchives);
 
-  // Any change updates preview
   const watch = [
     'scorePrefix','comboPrefix','scoreFont','comboFont',
     'nW','nH','mySize','myPad',
@@ -623,7 +748,6 @@
   $('scoreFont').addEventListener('change', schedulePreview);
   $('comboFont').addEventListener('change', schedulePreview);
 
-  // initial
   (async () => {
     try{
       await ensureFonts();

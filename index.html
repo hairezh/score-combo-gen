@@ -3,504 +3,321 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>osu!mania — Score/Combo Prefix Generator (Font → PNG)</title>
+  <title>osu!mania — Score/Combo Font → PNG</title>
   <style>
     :root{
-      --bg:#0b0c0f;
-      --fg:#ececec;
-      --muted:rgba(255,255,255,.68);
-      --border:rgba(255,255,255,.12);
-      --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.035);
-      --shadow:0 18px 60px rgba(0,0,0,.55);
-      --r:16px;
-      --pad:14px;
-      --gap:12px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      --btn: rgba(255,255,255,.10);
-      --btn2: rgba(255,255,255,.16);
-      --good: rgba(80,255,200,.18);
+      --bg:#0b0c0f; --fg:#ececec; --muted:rgba(255,255,255,.65);
+      --border:rgba(255,255,255,.12); --panel:rgba(255,255,255,.06);
+      --r:14px; --shadow:0 18px 55px rgba(0,0,0,.55);
+      --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Apple Color Emoji","Segoe UI Emoji";
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
-      margin:0;
-      font-family:var(--sans);
-      color:var(--fg);
+      margin:0; font-family:var(--sans); color:var(--fg);
       background:
-        radial-gradient(1200px 900px at 15% 10%, rgba(120,110,255,.14), transparent 55%),
+        radial-gradient(1200px 900px at 20% 10%, rgba(120,110,255,.14), transparent 55%),
         radial-gradient(900px 700px at 85% 25%, rgba(0,255,210,.10), transparent 60%),
         var(--bg);
     }
-    .wrap{max-width:1240px;margin:0 auto;padding:18px}
-    header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-    h1{margin:0;font-size:18px;letter-spacing:.2px}
-    .sub{color:var(--muted);font-size:12.5px;line-height:1.35}
-    .grid{
-      display:grid;
-      grid-template-columns: 480px 1fr;
-      gap:14px;
-    }
-    @media (max-width: 1040px){ .grid{grid-template-columns:1fr} }
+    .wrap{max-width:1120px;margin:0 auto;padding:16px}
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    h1{margin:0;font-size:16px}
+    .sub{color:var(--muted);font-size:12px;line-height:1.35}
+    .grid{display:grid;grid-template-columns: 420px 1fr; gap:12px}
+    @media (max-width: 980px){.grid{grid-template-columns:1fr}}
     .card{
-      border:1px solid var(--border);
-      background:linear-gradient(180deg, var(--panel), var(--panel2));
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
-      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden;
     }
-    .hd{
-      padding:12px 14px;
-      border-bottom:1px solid var(--border);
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-    }
-    .hd b{font-size:13px}
-    .bd{padding:14px}
-    .row{display:grid;grid-template-columns: 1fr 1fr;gap:12px}
-    .row3{display:grid;grid-template-columns: 1fr 1fr 1fr;gap:12px}
-    .row4{display:grid;grid-template-columns: 1fr 1fr 1fr 1fr;gap:12px}
-    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .hd{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .hd b{font-size:12.5px}
+    .bd{padding:12px}
+    label{display:block;color:var(--muted);font-size:11.5px;margin-bottom:6px}
     input[type="text"], input[type="number"], select{
-      width:100%;
-      padding:10px 10px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.28);
-      color:var(--fg);
-      outline:none;
+      width:100%; padding:9px 10px; border-radius:12px;
+      border:1px solid var(--border); background:rgba(0,0,0,.26); color:var(--fg); outline:none;
     }
     input[type="file"]{
-      width:100%;
-      padding:10px;
-      border-radius:12px;
-      border:1px dashed var(--border);
-      background:rgba(0,0,0,.18);
-      color:var(--muted);
+      width:100%; padding:9px 10px; border-radius:12px;
+      border:1px dashed var(--border); background:rgba(0,0,0,.18); color:var(--muted);
     }
-    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .row{display:grid;grid-template-columns:1fr 1fr; gap:10px}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr; gap:10px}
+    .sep{height:1px;background:var(--border);margin:10px 0}
+    .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     button{
-      appearance:none;border:1px solid var(--border);
-      background:var(--btn);
-      color:var(--fg);
-      padding:10px 12px;border-radius:999px;
-      cursor:pointer;
-      font-weight:600;
-      transition:transform .08s ease, background .12s ease;
+      border:1px solid var(--border); background:rgba(255,255,255,.10); color:var(--fg);
+      padding:9px 11px; border-radius:999px; cursor:pointer; font-weight:650;
     }
-    button:hover{background:var(--btn2)}
-    button:active{transform:translateY(1px)}
-    .btn-good{background:var(--good)}
-    .tiny{font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:8px}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:7px 10px;border-radius:999px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.22);
-      color:var(--muted);
-      font-size:12px;
-      user-select:none;
-    }
-    .mono{font-family:var(--mono)}
-    .divider{height:1px;background:var(--border);margin:12px 0}
-    .preview-wrap{display:grid;grid-template-columns: 1fr; gap:12px}
-    .preview-grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-    @media (max-width: 780px){ .preview-grid{grid-template-columns:1fr} }
-
-    .pv{
-      border:1px solid var(--border);
-      border-radius:14px;
-      background:rgba(0,0,0,.18);
-      overflow:hidden;
-    }
-    .pv .pvh{
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
-      display:flex;align-items:center;justify-content:space-between;gap:8px;
-    }
-    .pv .pvh .t{font-size:12.5px;font-weight:700}
-    .pv .pvh .s{font-size:11.5px;color:var(--muted)}
-    .pv .pvb{padding:10px 12px}
-
-    /* More items: make thumbs denser */
-    .thumbs{
-      display:grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap:10px;
-    }
-    @media (max-width: 520px){
-      .thumbs{grid-template-columns: repeat(4, minmax(0, 1fr));}
-    }
-    .thumb{
-      display:flex;flex-direction:column;gap:6px;align-items:center;
-      padding:8px;border-radius:12px;border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.03);
-    }
-    .thumb canvas{image-rendering:auto;display:block}
-    .thumb .cap{font-size:11px;color:var(--muted);font-family:var(--mono)}
-    .note{
-      padding:10px 12px;border-radius:14px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.18);
-      color:var(--muted);
-      font-size:12.3px;
-      line-height:1.4;
-    }
-    .status{
-      margin-top:10px;
-      font-size:12px;color:var(--muted);
-    }
+    button:hover{background:rgba(255,255,255,.16)}
+    .ok{background:rgba(80,255,200,.18)}
+    .tiny{margin-top:6px;font-size:11.2px;color:var(--muted);line-height:1.35}
+    .status{margin-top:8px;font-size:11.5px;color:var(--muted)}
     .status b{color:var(--fg)}
-    .right-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .pv{
+      border:1px solid var(--border); border-radius:14px; overflow:hidden;
+      background:rgba(0,0,0,.18);
+    }
+    .pvh{padding:9px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .pvh .t{font-size:12px;font-weight:750}
+    .pvh .s{font-size:11.2px;color:var(--muted)}
+    .pvb{padding:10px 12px}
+    .thumbs{display:grid;grid-template-columns: repeat(6, minmax(0, 1fr)); gap:10px}
+    @media (max-width: 520px){.thumbs{grid-template-columns: repeat(4, minmax(0, 1fr));}}
+    .thumb{
+      display:flex;flex-direction:column;align-items:center;gap:6px;
+      padding:8px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);
+    }
+    .thumb canvas{display:block}
+    .cap{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>osu!mania — Score/Combo Prefix Generator (Font → PNG)</h1>
-        <div class="sub">
-          Normal: <span class="mono">44×66 @2x</span> (centered) + downscale <span class="mono">22×33</span> •
-          My style: <span class="mono">350×350</span> (top-right, clamped inside canvas)
-        </div>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>osu!mania — Score/Combo Prefix Generator</h1>
+      <div class="sub">
+        Normal: <span style="font-family:var(--mono)">44×66 @2x</span> centered + auto 1x download •
+        My style: <span style="font-family:var(--mono)">350×350</span> top-right (clamped)
       </div>
-      <div class="right-actions">
-        <span class="pill">Score: 1–9,0,.,%,x,comma • Combo: 0–9</span>
-      </div>
-    </header>
-
-    <div class="grid">
-      <!-- CONTROLS -->
-      <section class="card">
-        <div class="hd">
-          <b>Settings</b>
-          <button id="btnRender" class="btn-good">Generate / Refresh Preview</button>
-        </div>
-        <div class="bd">
-          <div class="note">
-            <b>What this makes:</b>
-            <span class="mono">score-0..9</span> plus <span class="mono">score-dot</span>, <span class="mono">score-percent</span>, <span class="mono">score-x</span>, <span class="mono">score-comma</span>.
-            Combo generates only <span class="mono">0..9</span>.
-            Normal style outputs both <span class="mono">@2x</span> and downscaled <span class="mono">1x</span>.
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="row">
-            <div>
-              <label>Score style</label>
-              <select id="scoreStyle">
-                <option value="normal">Normal (44×66 @2x + downscale)</option>
-                <option value="my">My style (350×350, top-right)</option>
-              </select>
-            </div>
-            <div>
-              <label>Score prefix</label>
-              <input id="scorePrefix" type="text" value="score-" />
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:12px;">
-            <div>
-              <label>Score font (.ttf/.otf)</label>
-              <input id="scoreFont" type="file" accept=".ttf,.otf" />
-              <div class="tiny">Local-only. Everything happens inside your browser.</div>
-            </div>
-            <div>
-              <label>Font size (Score)</label>
-              <input id="scoreSize" type="number" min="1" step="1" value="52" />
-              <div class="tiny">For Normal style, this is the “zoom” inside 44×66.</div>
-            </div>
-          </div>
-
-          <div class="row3" style="margin-top:12px;">
-            <div>
-              <label>Color (Score)</label>
-              <input id="scoreColor" type="text" value="#FFFFFF" />
-            </div>
-            <div>
-              <label>Offset X (Score)</label>
-              <input id="scoreOffX" type="number" step="1" value="0" />
-            </div>
-            <div>
-              <label>Offset Y (Score)</label>
-              <input id="scoreOffY" type="number" step="1" value="0" />
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="row">
-            <div>
-              <label>Combo style</label>
-              <select id="comboStyle">
-                <option value="normal">Normal (44×66 @2x + downscale)</option>
-                <option value="my">My style (350×350, top-right)</option>
-              </select>
-            </div>
-            <div>
-              <label>Combo prefix</label>
-              <input id="comboPrefix" type="text" value="mania-combo-" />
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:12px;">
-            <div>
-              <label>Combo font (.ttf/.otf)</label>
-              <input id="comboFont" type="file" accept=".ttf,.otf" />
-            </div>
-            <div>
-              <label>Font size (Combo)</label>
-              <input id="comboSize" type="number" min="1" step="1" value="52" />
-            </div>
-          </div>
-
-          <div class="row3" style="margin-top:12px;">
-            <div>
-              <label>Color (Combo)</label>
-              <input id="comboColor" type="text" value="#FFFFFF" />
-            </div>
-            <div>
-              <label>Offset X (Combo)</label>
-              <input id="comboOffX" type="number" step="1" value="0" />
-            </div>
-            <div>
-              <label>Offset Y (Combo)</label>
-              <input id="comboOffY" type="number" step="1" value="0" />
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="row4">
-            <div>
-              <label>Top-right padding (My style)</label>
-              <input id="myPad" type="number" min="0" step="1" value="6" />
-            </div>
-            <div>
-              <label>My style canvas size</label>
-              <input id="mySize" type="number" min="1" step="1" value="350" />
-            </div>
-            <div>
-              <label>Normal @2x width</label>
-              <input id="nW" type="number" min="1" step="1" value="44" />
-            </div>
-            <div>
-              <label>Normal @2x height</label>
-              <input id="nH" type="number" min="1" step="1" value="66" />
-            </div>
-          </div>
-
-          <div class="btns">
-            <button id="btnDlScore2x">Download Score @2x</button>
-            <button id="btnDlScore1x">Download Score 1x</button>
-            <button id="btnDlCombo2x">Download Combo @2x</button>
-            <button id="btnDlCombo1x">Download Combo 1x</button>
-            <button id="btnDlMy">Download My style (Score + Combo)</button>
-          </div>
-
-          <div class="status" id="status">Status: <b>ready</b>.</div>
-          <div class="tiny">
-            Naming (Normal): <span class="mono">{prefix}{key}@2x.png</span> and <span class="mono">{prefix}{key}.png</span><br/>
-            Special score keys map to: <span class="mono">dot / percent / x / comma</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- PREVIEW -->
-      <section class="card">
-        <div class="hd">
-          <b>Preview</b>
-          <span class="pill mono">Score includes dot/percent/x/comma</span>
-        </div>
-        <div class="bd">
-          <div class="preview-wrap">
-            <div class="preview-grid">
-              <div class="pv">
-                <div class="pvh">
-                  <div>
-                    <div class="t">Score — @2x</div>
-                    <div class="s mono" id="pvScore2xInfo">44×66</div>
-                  </div>
-                  <div class="s" id="pvScoreStyleTag">Normal</div>
-                </div>
-                <div class="pvb"><div class="thumbs" id="pvScore2x"></div></div>
-              </div>
-
-              <div class="pv">
-                <div class="pvh">
-                  <div>
-                    <div class="t">Score — 1x</div>
-                    <div class="s mono" id="pvScore1xInfo">22×33</div>
-                  </div>
-                  <div class="s">Downscale</div>
-                </div>
-                <div class="pvb"><div class="thumbs" id="pvScore1x"></div></div>
-              </div>
-
-              <div class="pv">
-                <div class="pvh">
-                  <div>
-                    <div class="t">Combo — @2x</div>
-                    <div class="s mono" id="pvCombo2xInfo">44×66</div>
-                  </div>
-                  <div class="s" id="pvComboStyleTag">Normal</div>
-                </div>
-                <div class="pvb"><div class="thumbs" id="pvCombo2x"></div></div>
-              </div>
-
-              <div class="pv">
-                <div class="pvh">
-                  <div>
-                    <div class="t">Combo — 1x</div>
-                    <div class="s mono" id="pvCombo1xInfo">22×33</div>
-                  </div>
-                  <div class="s">Downscale</div>
-                </div>
-                <div class="pvb"><div class="thumbs" id="pvCombo1x"></div></div>
-              </div>
-            </div>
-
-            <div class="pv">
-              <div class="pvh">
-                <div>
-                  <div class="t">My style (top-right, clamped)</div>
-                  <div class="s mono" id="pvMyInfo">350×350</div>
-                </div>
-                <div class="s">Score + Combo</div>
-              </div>
-              <div class="pvb">
-                <div class="thumbs" id="pvMy"></div>
-              </div>
-            </div>
-
-            <div class="note">
-              Canvas text metrics can vary a bit by browser. Use font size + offsets to fine-tune alignment.
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div class="hd">
+        <b>Settings</b>
+        <button id="btnRender" class="ok">Generate</button>
+      </div>
+      <div class="bd">
+        <div class="row">
+          <div>
+            <label>Score style</label>
+            <select id="scoreStyle">
+              <option value="normal">Normal (@2x + 1x)</option>
+              <option value="my">My style (350×350)</option>
+            </select>
+          </div>
+          <div>
+            <label>Score prefix</label>
+            <input id="scorePrefix" type="text" value="score-" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <div>
+            <label>Score font (.ttf/.otf)</label>
+            <input id="scoreFont" type="file" accept=".ttf,.otf" />
+          </div>
+          <div>
+            <label>Score size</label>
+            <input id="scoreSize" type="number" min="1" step="1" value="52" />
+          </div>
+        </div>
+
+        <div class="row3" style="margin-top:10px;">
+          <div>
+            <label>Score color</label>
+            <input id="scoreColor" type="text" value="#FFFFFF" />
+          </div>
+          <div>
+            <label>Score X</label>
+            <input id="scoreOffX" type="number" step="1" value="0" />
+          </div>
+          <div>
+            <label>Score Y</label>
+            <input id="scoreOffY" type="number" step="1" value="0" />
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <div>
+            <label>Combo style</label>
+            <select id="comboStyle">
+              <option value="normal">Normal (@2x + 1x)</option>
+              <option value="my">My style (350×350)</option>
+            </select>
+          </div>
+          <div>
+            <label>Combo prefix</label>
+            <input id="comboPrefix" type="text" value="mania-combo-" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <div>
+            <label>Combo font (.ttf/.otf)</label>
+            <input id="comboFont" type="file" accept=".ttf,.otf" />
+          </div>
+          <div>
+            <label>Combo size</label>
+            <input id="comboSize" type="number" min="1" step="1" value="52" />
+          </div>
+        </div>
+
+        <div class="row3" style="margin-top:10px;">
+          <div>
+            <label>Combo color</label>
+            <input id="comboColor" type="text" value="#FFFFFF" />
+          </div>
+          <div>
+            <label>Combo X</label>
+            <input id="comboOffX" type="number" step="1" value="0" />
+          </div>
+          <div>
+            <label>Combo Y</label>
+            <input id="comboOffY" type="number" step="1" value="0" />
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row3">
+          <div>
+            <label>Normal @2x W</label>
+            <input id="nW" type="number" min="1" step="1" value="44" />
+          </div>
+          <div>
+            <label>Normal @2x H</label>
+            <input id="nH" type="number" min="1" step="1" value="66" />
+          </div>
+          <div>
+            <label>My style pad</label>
+            <input id="myPad" type="number" min="0" step="1" value="6" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <div>
+            <label>My style canvas</label>
+            <input id="mySize" type="number" min="1" step="1" value="350" />
+          </div>
+          <div class="tiny">
+            Score outputs: 0–9 + dot/percent/x/comma<br/>
+            Combo outputs: 0–9 only
+          </div>
+        </div>
+
+        <div class="btns">
+          <button id="dlScore2x">Download Score @2x</button>
+          <button id="dlScore1x">Download Score 1x</button>
+          <button id="dlCombo2x">Download Combo @2x</button>
+          <button id="dlCombo1x">Download Combo 1x</button>
+          <button id="dlMy">Download My style</button>
+        </div>
+
+        <div class="status" id="status">Status: <b>ready</b>.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd">
+        <b>Preview</b>
+        <span class="tiny" style="margin:0">Preview shows <span style="font-family:var(--mono)">@2x only</span>.</span>
+      </div>
+      <div class="bd">
+        <div class="pv">
+          <div class="pvh">
+            <div>
+              <div class="t">Score @2x</div>
+              <div class="s" id="infoScore">44×66 • 0–9 + dot/percent/x/comma</div>
+            </div>
+            <div class="s" id="tagScore">Normal</div>
+          </div>
+          <div class="pvb"><div class="thumbs" id="pvScore"></div></div>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div class="pv">
+          <div class="pvh">
+            <div>
+              <div class="t">Combo @2x</div>
+              <div class="s" id="infoCombo">44×66 • 0–9</div>
+            </div>
+            <div class="s" id="tagCombo">Normal</div>
+          </div>
+          <div class="pvb"><div class="thumbs" id="pvCombo"></div></div>
+        </div>
+      </div>
+    </section>
   </div>
+</div>
 
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  // SCORE must include: 1..9,0,.,%,x,,
-  // COMBO must include: 1..9,0
   const SCORE_GLYPHS = ['1','2','3','4','5','6','7','8','9','0','.', '%', 'x', ','];
   const COMBO_GLYPHS = ['1','2','3','4','5','6','7','8','9','0'];
 
-  // Filename key mapping for special score glyphs (osu skin naming convention)
-  function scoreKeyForGlyph(g){
-    if(g >= '0' && g <= '9') return g;
-    if(g === '.') return 'dot';
-    if(g === '%') return 'percent';
-    if(g === 'x') return 'x';
-    if(g === ',') return 'comma';
-    return g; // fallback
-  }
-
-  function comboKeyForGlyph(g){
-    return g; // only digits
-  }
-
-  const el = {
-    scoreStyle: $('scoreStyle'),
-    scorePrefix: $('scorePrefix'),
-    scoreFont: $('scoreFont'),
-    scoreSize: $('scoreSize'),
-    scoreColor: $('scoreColor'),
-    scoreOffX: $('scoreOffX'),
-    scoreOffY: $('scoreOffY'),
-
-    comboStyle: $('comboStyle'),
-    comboPrefix: $('comboPrefix'),
-    comboFont: $('comboFont'),
-    comboSize: $('comboSize'),
-    comboColor: $('comboColor'),
-    comboOffX: $('comboOffX'),
-    comboOffY: $('comboOffY'),
-
-    myPad: $('myPad'),
-    mySize: $('mySize'),
-    nW: $('nW'),
-    nH: $('nH'),
-
-    btnRender: $('btnRender'),
-    btnDlScore2x: $('btnDlScore2x'),
-    btnDlScore1x: $('btnDlScore1x'),
-    btnDlCombo2x: $('btnDlCombo2x'),
-    btnDlCombo1x: $('btnDlCombo1x'),
-    btnDlMy: $('btnDlMy'),
-
-    status: $('status'),
-
-    pvScore2x: $('pvScore2x'),
-    pvScore1x: $('pvScore1x'),
-    pvCombo2x: $('pvCombo2x'),
-    pvCombo1x: $('pvCombo1x'),
-    pvMy: $('pvMy'),
-
-    pvScore2xInfo: $('pvScore2xInfo'),
-    pvScore1xInfo: $('pvScore1xInfo'),
-    pvCombo2xInfo: $('pvCombo2xInfo'),
-    pvCombo1xInfo: $('pvCombo1xInfo'),
-    pvMyInfo: $('pvMyInfo'),
-    pvScoreStyleTag: $('pvScoreStyleTag'),
-    pvComboStyleTag: $('pvComboStyleTag'),
+  const scoreKeyForGlyph = (g) => {
+    if (g >= '0' && g <= '9') return g;
+    if (g === '.') return 'dot';
+    if (g === '%') return 'percent';
+    if (g === 'x') return 'x';
+    if (g === ',') return 'comma';
+    return g;
   };
 
-  let fontFamilyScore = null;
-  let fontFamilyCombo = null;
+  const el = {
+    scoreStyle: $('scoreStyle'), scorePrefix: $('scorePrefix'),
+    scoreFont: $('scoreFont'), scoreSize: $('scoreSize'), scoreColor: $('scoreColor'),
+    scoreOffX: $('scoreOffX'), scoreOffY: $('scoreOffY'),
 
-  function setStatus(text){
-    el.status.innerHTML = `Status: <b>${text}</b>.`;
-  }
+    comboStyle: $('comboStyle'), comboPrefix: $('comboPrefix'),
+    comboFont: $('comboFont'), comboSize: $('comboSize'), comboColor: $('comboColor'),
+    comboOffX: $('comboOffX'), comboOffY: $('comboOffY'),
 
-  function sanitizePrefix(p){
-    return (p || '').trim();
-  }
+    nW: $('nW'), nH: $('nH'), myPad: $('myPad'), mySize: $('mySize'),
 
-  async function loadFontFromFile(file, familyBase){
-    if(!file) return null;
+    btnRender: $('btnRender'),
+    dlScore2x: $('dlScore2x'), dlScore1x: $('dlScore1x'),
+    dlCombo2x: $('dlCombo2x'), dlCombo1x: $('dlCombo1x'),
+    dlMy: $('dlMy'),
+
+    status: $('status'),
+    pvScore: $('pvScore'), pvCombo: $('pvCombo'),
+    tagScore: $('tagScore'), tagCombo: $('tagCombo'),
+    infoScore: $('infoScore'), infoCombo: $('infoCombo')
+  };
+
+  let fontScore = 'sans-serif';
+  let fontCombo = 'sans-serif';
+  let rendered = { score: null, combo: null };
+
+  const makeCanvas = (w,h) => { const c=document.createElement('canvas'); c.width=w; c.height=h; return c; };
+  const clear = (ctx,w,h) => ctx.clearRect(0,0,w,h);
+  const setStatus = (t) => el.status.innerHTML = `Status: <b>${t}</b>.`;
+  const sanitizePrefix = (p) => (p||'').trim();
+
+  async function loadFontFromFile(file, base){
     const ab = await file.arrayBuffer();
-    const blob = new Blob([ab], {type: "font/ttf"});
+    const blob = new Blob([ab], {type:"font/ttf"});
     const url = URL.createObjectURL(blob);
-    const family = `${familyBase}-${Math.random().toString(16).slice(2)}`;
+    const family = `${base}-${Math.random().toString(16).slice(2)}`;
     const ff = new FontFace(family, `url(${url})`);
     await ff.load();
     document.fonts.add(ff);
     return family;
   }
 
-  function makeCanvas(w,h){
-    const c = document.createElement('canvas');
-    c.width = w; c.height = h;
-    return c;
-  }
-
-  function clear(ctx,w,h){
-    ctx.clearRect(0,0,w,h);
-  }
-
-  function drawCenteredText(ctx, text, w, h, family, size, color, offX, offY){
+  function drawCentered(ctx, text, w, h, family, size, color, ox, oy){
     ctx.save();
     ctx.font = `${size}px "${family}", sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.imageSmoothingEnabled = true;
-    ctx.fillText(text, w/2 + offX, h/2 + offY);
+    ctx.fillText(text, w/2 + ox, h/2 + oy);
     ctx.restore();
   }
 
-  function drawTopRightText(ctx, text, w, h, family, size, color, pad, offX, offY){
+  function drawTopRight(ctx, text, w, h, family, size, color, pad, ox, oy){
     ctx.save();
     ctx.font = `${size}px "${family}", sans-serif`;
     ctx.fillStyle = color;
@@ -509,33 +326,30 @@
     ctx.imageSmoothingEnabled = true;
 
     const m = ctx.measureText(text);
-    const ascent = m.actualBoundingBoxAscent || size*0.8;
-    const descent = m.actualBoundingBoxDescent || size*0.2;
+    const asc = m.actualBoundingBoxAscent || size*0.8;
+    const desc = m.actualBoundingBoxDescent || size*0.2;
     const tw = m.width;
 
-    let x = (w - pad - tw) + offX;
-    let y = (pad + ascent) + offY;
+    let x = (w - pad - tw) + ox;
+    let y = (pad + asc) + oy;
 
     x = Math.max(0, Math.min(x, w - tw));
-    y = Math.max(ascent, Math.min(y, h - descent));
+    y = Math.max(asc, Math.min(y, h - desc));
 
     ctx.fillText(text, x, y);
     ctx.restore();
   }
 
-  function downscaleCanvas(srcCanvas, targetW, targetH){
-    const out = makeCanvas(targetW, targetH);
-    const octx = out.getContext('2d');
-    octx.imageSmoothingEnabled = true;
-    octx.clearRect(0,0,targetW,targetH);
-    octx.drawImage(srcCanvas, 0, 0, targetW, targetH);
+  function downscale(src, w, h){
+    const out = makeCanvas(w,h);
+    const o = out.getContext('2d');
+    o.imageSmoothingEnabled = true;
+    o.clearRect(0,0,w,h);
+    o.drawImage(src, 0,0,w,h);
     return out;
   }
 
-  function canvasToBlob(canvas){
-    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-  }
-
+  const toBlob = (c) => new Promise(res => c.toBlob(res,'image/png'));
   function downloadBlob(blob, filename){
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -547,83 +361,63 @@
     setTimeout(()=>URL.revokeObjectURL(url), 1500);
   }
 
-  function renderSet({style, prefix, family, size, color, offX, offY, nW, nH, mySize, myPad, glyphs, keyForGlyph}){
+  async function ensureFonts(){
+    setStatus('loading fonts');
+    const sf = el.scoreFont.files?.[0] || null;
+    const cf = el.comboFont.files?.[0] || null;
+    fontScore = sf ? await loadFontFromFile(sf, 'ScoreFont') : 'sans-serif';
+    fontCombo = cf ? await loadFontFromFile(cf, 'ComboFont') : 'sans-serif';
+    setStatus('fonts ready');
+  }
+
+  function renderSet({style, prefix, family, size, color, ox, oy, nW, nH, mySize, myPad, glyphs, keyForGlyph}){
     const pref = sanitizePrefix(prefix);
+    const out = { twoX:new Map(), oneX:new Map(), my:new Map(), style };
     const isNormal = style === 'normal';
 
-    const result = {
-      twoX: new Map(), // filename -> canvas (@2x)
-      oneX: new Map(), // filename -> canvas (downscale)
-      my: new Map(),   // filename -> canvas (my style)
-      meta: {pref, style}
-    };
-
     for(const g of glyphs){
-      const key = keyForGlyph(g);
+      const key = keyForGlyph ? keyForGlyph(g) : g;
 
       if(isNormal){
-        const c2x = makeCanvas(nW, nH);
-        const ctx = c2x.getContext('2d');
+        const c2 = makeCanvas(nW,nH);
+        const ctx = c2.getContext('2d');
         clear(ctx,nW,nH);
-        drawCenteredText(ctx, g, nW, nH, family, size, color, offX, offY);
+        drawCentered(ctx, g, nW,nH, family, size, color, ox, oy);
 
-        const c1x = downscaleCanvas(c2x, Math.round(nW/2), Math.round(nH/2));
-
-        result.twoX.set(`${pref}${key}@2x.png`, c2x);
-        result.oneX.set(`${pref}${key}.png`, c1x);
-      }else{
+        const c1 = downscale(c2, Math.round(nW/2), Math.round(nH/2));
+        out.twoX.set(`${pref}${key}@2x.png`, c2);
+        out.oneX.set(`${pref}${key}.png`, c1);
+      } else {
         const S = mySize;
-        const c = makeCanvas(S, S);
+        const c = makeCanvas(S,S);
         const ctx = c.getContext('2d');
         clear(ctx,S,S);
-        drawTopRightText(ctx, g, S, S, family, size, color, myPad, offX, offY);
-        result.my.set(`${pref}${key}.png`, c);
+        drawTopRight(ctx, g, S,S, family, size, color, myPad, ox, oy);
+        out.my.set(`${pref}${key}.png`, c);
       }
     }
-
-    return result;
+    return out;
   }
 
   function fillPreview(container, map){
     container.innerHTML = '';
-    const entries = [...map.entries()];
-    for(const [name, canvas] of entries){
+    for(const [name, canvas] of map.entries()){
       const box = document.createElement('div');
       box.className = 'thumb';
-
       const c = makeCanvas(canvas.width, canvas.height);
-      const ctx = c.getContext('2d');
-      ctx.imageSmoothingEnabled = true;
-      ctx.clearRect(0,0,c.width,c.height);
-      ctx.drawImage(canvas,0,0);
-
+      c.getContext('2d').drawImage(canvas,0,0);
       box.appendChild(c);
       const cap = document.createElement('div');
       cap.className = 'cap';
-      cap.textContent = name.replace(/^.*?(score-|mania-combo-)/,''); // show key-ish suffix
+      cap.textContent = name.replace(/^.*?([A-Za-z0-9]+(?:@2x)?\.png)$/,'$1');
       box.appendChild(cap);
-
       container.appendChild(box);
     }
   }
 
-  let rendered = { score:null, combo:null };
-
-  async function ensureFontsLoaded(){
-    setStatus('loading fonts');
-
-    const sfile = el.scoreFont.files?.[0] || null;
-    const cfile = el.comboFont.files?.[0] || null;
-
-    fontFamilyScore = sfile ? await loadFontFromFile(sfile, 'ScoreFont') : 'sans-serif';
-    fontFamilyCombo = cfile ? await loadFontFromFile(cfile, 'ComboFont') : 'sans-serif';
-
-    setStatus('fonts ready');
-  }
-
   async function renderAll(){
     try{
-      await ensureFontsLoaded();
+      await ensureFonts();
 
       const nW = Math.max(1, parseInt(el.nW.value||'44',10));
       const nH = Math.max(1, parseInt(el.nH.value||'66',10));
@@ -636,11 +430,11 @@
       const score = renderSet({
         style: scoreStyle,
         prefix: el.scorePrefix.value,
-        family: fontFamilyScore,
+        family: fontScore,
         size: parseInt(el.scoreSize.value||'52',10),
         color: (el.scoreColor.value||'#fff').trim(),
-        offX: parseInt(el.scoreOffX.value||'0',10),
-        offY: parseInt(el.scoreOffY.value||'0',10),
+        ox: parseInt(el.scoreOffX.value||'0',10),
+        oy: parseInt(el.scoreOffY.value||'0',10),
         nW, nH, mySize, myPad,
         glyphs: SCORE_GLYPHS,
         keyForGlyph: scoreKeyForGlyph
@@ -649,113 +443,97 @@
       const combo = renderSet({
         style: comboStyle,
         prefix: el.comboPrefix.value,
-        family: fontFamilyCombo,
+        family: fontCombo,
         size: parseInt(el.comboSize.value||'52',10),
         color: (el.comboColor.value||'#fff').trim(),
-        offX: parseInt(el.comboOffX.value||'0',10),
-        offY: parseInt(el.comboOffY.value||'0',10),
+        ox: parseInt(el.comboOffX.value||'0',10),
+        oy: parseInt(el.comboOffY.value||'0',10),
         nW, nH, mySize, myPad,
-        glyphs: COMBO_GLYPHS,
-        keyForGlyph: comboKeyForGlyph
+        glyphs: COMBO_GLYPHS
       });
 
       rendered.score = score;
       rendered.combo = combo;
 
-      el.pvScore2xInfo.textContent = `${nW}×${nH}`;
-      el.pvScore1xInfo.textContent = `${Math.round(nW/2)}×${Math.round(nH/2)}`;
-      el.pvCombo2xInfo.textContent = `${nW}×${nH}`;
-      el.pvCombo1xInfo.textContent = `${Math.round(nW/2)}×${Math.round(nH/2)}`;
-      el.pvMyInfo.textContent = `${mySize}×${mySize}`;
+      el.tagScore.textContent = (scoreStyle === 'normal') ? 'Normal' : 'My style';
+      el.tagCombo.textContent = (comboStyle === 'normal') ? 'Normal' : 'My style';
 
-      el.pvScoreStyleTag.textContent = (scoreStyle === 'normal') ? 'Normal' : 'My style';
-      el.pvComboStyleTag.textContent = (comboStyle === 'normal') ? 'Normal' : 'My style';
+      // Preview shows @2x only:
+      // - Normal: show twoX
+      // - My style: show my
+      const scorePreview = (scoreStyle === 'normal') ? score.twoX : score.my;
+      const comboPreview = (comboStyle === 'normal') ? combo.twoX : combo.my;
 
-      fillPreview(el.pvScore2x, score.twoX);
-      fillPreview(el.pvScore1x, score.oneX);
-      fillPreview(el.pvCombo2x, combo.twoX);
-      fillPreview(el.pvCombo1x, combo.oneX);
+      el.infoScore.textContent = (scoreStyle === 'normal')
+        ? `${nW}×${nH} • 0–9 + dot/percent/x/comma`
+        : `${mySize}×${mySize} • 0–9 + dot/percent/x/comma`;
 
-      // My style preview: show both (score + combo) if they are in my style
-      el.pvMy.innerHTML = '';
-      const myEntries = [];
-      for(const [n,c] of (score.my?.entries() || [])) myEntries.push([`S:${n}`, c]);
-      for(const [n,c] of (combo.my?.entries() || [])) myEntries.push([`C:${n}`, c]);
-      for(const [tag, canvas] of myEntries){
-        const box = document.createElement('div');
-        box.className = 'thumb';
-        const c = makeCanvas(canvas.width, canvas.height);
-        c.getContext('2d').drawImage(canvas,0,0);
-        box.appendChild(c);
-        const cap = document.createElement('div');
-        cap.className = 'cap';
-        cap.textContent = tag.replace(/^.*:(.*)$/, '$1');
-        box.appendChild(cap);
-        el.pvMy.appendChild(box);
-      }
+      el.infoCombo.textContent = (comboStyle === 'normal')
+        ? `${nW}×${nH} • 0–9`
+        : `${mySize}×${mySize} • 0–9`;
+
+      fillPreview(el.pvScore, scorePreview);
+      fillPreview(el.pvCombo, comboPreview);
 
       setStatus('preview updated');
-    }catch(err){
-      console.error(err);
+    }catch(e){
+      console.error(e);
       setStatus('error (check console)');
     }
   }
 
   async function downloadMap(map){
     for(const [name, canvas] of map.entries()){
-      const blob = await canvasToBlob(canvas);
+      const blob = await toBlob(canvas);
       downloadBlob(blob, name);
-      await new Promise(r=>setTimeout(r, 80));
+      await new Promise(r=>setTimeout(r, 70));
     }
   }
 
-  el.btnDlScore2x.addEventListener('click', async () => {
+  el.btnRender.addEventListener('click', renderAll);
+
+  el.dlScore2x.addEventListener('click', async () => {
     if(!rendered.score) await renderAll();
-    if(el.scoreStyle.value !== 'normal'){ setStatus('Score is not in Normal style'); return; }
+    if(el.scoreStyle.value !== 'normal'){ setStatus('Score is not Normal'); return; }
     setStatus('downloading score @2x');
     await downloadMap(rendered.score.twoX);
     setStatus('done');
   });
 
-  el.btnDlScore1x.addEventListener('click', async () => {
+  el.dlScore1x.addEventListener('click', async () => {
     if(!rendered.score) await renderAll();
-    if(el.scoreStyle.value !== 'normal'){ setStatus('Score is not in Normal style'); return; }
+    if(el.scoreStyle.value !== 'normal'){ setStatus('Score is not Normal'); return; }
     setStatus('downloading score 1x');
     await downloadMap(rendered.score.oneX);
     setStatus('done');
   });
 
-  el.btnDlCombo2x.addEventListener('click', async () => {
+  el.dlCombo2x.addEventListener('click', async () => {
     if(!rendered.combo) await renderAll();
-    if(el.comboStyle.value !== 'normal'){ setStatus('Combo is not in Normal style'); return; }
+    if(el.comboStyle.value !== 'normal'){ setStatus('Combo is not Normal'); return; }
     setStatus('downloading combo @2x');
     await downloadMap(rendered.combo.twoX);
     setStatus('done');
   });
 
-  el.btnDlCombo1x.addEventListener('click', async () => {
+  el.dlCombo1x.addEventListener('click', async () => {
     if(!rendered.combo) await renderAll();
-    if(el.comboStyle.value !== 'normal'){ setStatus('Combo is not in Normal style'); return; }
+    if(el.comboStyle.value !== 'normal'){ setStatus('Combo is not Normal'); return; }
     setStatus('downloading combo 1x');
     await downloadMap(rendered.combo.oneX);
     setStatus('done');
   });
 
-  el.btnDlMy.addEventListener('click', async () => {
+  el.dlMy.addEventListener('click', async () => {
     if(!rendered.score || !rendered.combo) await renderAll();
+    const scoreMy = el.scoreStyle.value === 'my';
+    const comboMy = el.comboStyle.value === 'my';
+    if(!scoreMy && !comboMy){ setStatus('Neither is My style'); return; }
     setStatus('downloading my style');
-
-    const scoreMy = (el.scoreStyle.value === 'my');
-    const comboMy = (el.comboStyle.value === 'my');
-
     if(scoreMy) await downloadMap(rendered.score.my);
     if(comboMy) await downloadMap(rendered.combo.my);
-
-    if(!scoreMy && !comboMy){ setStatus('neither is in My style'); return; }
     setStatus('done');
   });
-
-  el.btnRender.addEventListener('click', renderAll);
 
   renderAll();
 })();

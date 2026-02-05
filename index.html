@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/54/3b/3f/543b3f40b72752d5d8d76fb0177d5a76.jpg">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>osu!mania — Score/Combo Archives</title>
+  <title>osu!mania — prefix edit</title>
 
   <!-- JSZip (ZIP creation) -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -110,7 +111,7 @@
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(2px);
     }
 
     .hd{
@@ -289,8 +290,7 @@
       <div>
         <h1>osu!mania — Score/Combo Archives (Font → PNG)</h1>
         <div class="sub">
-          Preview is <span style="font-family:var(--mono)">@2x only</span> and locked (no scroll).
-          ZIP includes <span style="font-family:var(--mono)">normal (@2x + 1x)</span> + <span style="font-family:var(--mono)">my-style</span>.
+          <span style="font-family:var(--mono)">preview</span>
         </div>
       </div>
     </header>
@@ -300,8 +300,9 @@
       <section class="card">
         <div class="hd">
           <b>Settings</b>
-          <span class="tiny" style="margin:0">Score: 0–9 + dot/percent/x/comma • Combo: 0–9</span>
+          <span class="tiny" style="margin:0">Score/Combo</span>
         </div>
+
         <div class="bd">
           <div class="row">
             <div>
@@ -327,22 +328,24 @@
 
           <div class="sep"></div>
 
+          <!-- FIXED: properly closed columns inside row3 -->
           <div class="row3">
             <div>
-              <label>Normal @2x (W×H)</label>
+              <label>Img Size</label>
               <div class="row" style="gap:8px">
                 <input id="nW" type="number" min="1" step="1" value="44" />
                 <input id="nH" type="number" min="1" step="1" value="66" />
               </div>
-              <div class="tiny">1x is auto-downscaled to half.</div>
             </div>
+
             <div>
-              <label>My style canvas</label>
+              <label>Extra: h-style</label>
               <input id="mySize" type="number" min="1" step="1" value="350" />
-              <div class="tiny">Draw in top-right (clamped).</div>
+              <div class="tiny">Draw in top-right</div>
             </div>
+
             <div>
-              <label>My style padding</label>
+              <label>padding</label>
               <input id="myPad" type="number" min="0" step="1" value="6" />
             </div>
           </div>
@@ -382,19 +385,14 @@
           <button id="btnDownload" class="btn">Download Archives</button>
 
           <div class="status" id="status">Status: <b>ready</b>.</div>
-          <div class="tiny">
-            ZIP layout:
-            <span style="font-family:var(--mono)">/normal/</span> (osu files) +
-            <span style="font-family:var(--mono)">/my-style/</span> (350×350 variants)
-          </div>
+          <div class="tiny"></div>
         </div>
       </section>
 
       <!-- PREVIEW -->
       <section class="card">
         <div class="hd">
-          <b>Preview (@2x only)</b>
-          <span class="tiny" style="margin:0">Static grid, no scroll</span>
+          <b>Preview</b>
         </div>
 
         <div class="bd preview">
@@ -402,10 +400,10 @@
             <div class="pv">
               <div class="pvh">
                 <div>
-                  <div class="t">Score @2x</div>
+                  <div class="t">Score preview</div>
                   <div class="s" id="infoScore">—</div>
                 </div>
-                <div class="s" id="tagScore">Normal @2x</div>
+                <div class="s" id="tagScore">Normal preview</div>
               </div>
               <div class="pvb">
                 <div class="thumbs score" id="pvScore"></div>
@@ -415,10 +413,11 @@
             <div class="pv">
               <div class="pvh">
                 <div>
-                  <div class="t">Combo @2x</div>
+                  <div class="t">Combo</div>
                   <div class="s" id="infoCombo">—</div>
                 </div>
-                <div class="s" id="tagCombo">Normal @2x</div>
+                <!-- FIX: label text only (doesn't affect code) -->
+                <div class="s" id="tagCombo">Normal preview</div>
               </div>
               <div class="pvb">
                 <div class="thumbs combo" id="pvCombo"></div>
@@ -427,7 +426,7 @@
           </div>
 
           <div class="tiny" style="margin-top:0">
-            Preview always shows the <span style="font-family:var(--mono)">normal @2x</span> set only.
+            Preview always shows the <span style="font-family:var(--mono)">img @2x</span> set only.
             (ZIP still includes <span style="font-family:var(--mono)">normal 1x</span> and <span style="font-family:var(--mono)">my-style</span>.)
           </div>
         </div>
@@ -635,7 +634,6 @@
       glyphs: COMBO_GLYPHS
     });
 
-    // locked preview: normal @2x only
     fillPreview(el.pvScore, score.normal2x);
     fillPreview(el.pvCombo, combo.normal2x);
 
@@ -644,7 +642,7 @@
     el.tagScore.textContent = 'Normal @2x';
     el.tagCombo.textContent = 'Normal @2x';
 
-    return {score, combo, nW, nH, mySize};
+    return {score, combo};
   }
 
   async function downloadArchives(){
@@ -720,7 +718,6 @@
     }
   }
 
-  // Debounced live preview (still no scroll)
   let debounceT = null;
   function schedulePreview(){
     clearTimeout(debounceT);

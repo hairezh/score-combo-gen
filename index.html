@@ -75,13 +75,7 @@
       gap:12px;
     }
 
-    header{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;}
     h1{margin:0;font-size:15px;letter-spacing:.2px}
     .sub{color:var(--muted);font-size:12px;line-height:1.35}
 
@@ -120,11 +114,7 @@
     }
     .hd b{font-size:12.5px}
 
-    .bd{
-      padding:12px;
-      overflow:auto;
-    }
-
+    .bd{padding:12px;overflow:auto;}
     .bd.preview{
       overflow:hidden !important;
       display:flex;
@@ -162,9 +152,7 @@
       cursor:pointer;
       font-weight:800;
     }
-    input[type="file"]::file-selector-button:hover{
-      border-color:rgba(255,255,255,.32);
-    }
+    input[type="file"]::file-selector-button:hover{border-color:rgba(255,255,255,.32);}
 
     .row{display:grid;grid-template-columns:1fr 1fr; gap:10px}
     .row3{display:grid;grid-template-columns:1fr 1fr 1fr; gap:10px}
@@ -193,9 +181,7 @@
       grid-template-columns: 1fr 1fr;
       gap:10px;
     }
-    @media (max-width: 980px){
-      .previewSplit{grid-template-columns:1fr}
-    }
+    @media (max-width: 980px){ .previewSplit{grid-template-columns:1fr} }
 
     .pv{
       border:1px solid var(--border);
@@ -233,16 +219,10 @@
       align-content:start;
       justify-items:stretch;
     }
-
     .thumbs.score{grid-template-columns: repeat(7, minmax(0, 1fr));}
     .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
-
     @media (max-width: 1160px){
       .thumbs.score{grid-template-columns: repeat(6, minmax(0, 1fr));}
-      .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
-    }
-    @media (max-width: 980px){
-      .thumbs.score{grid-template-columns: repeat(7, minmax(0, 1fr));}
       .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
     }
     @media (max-width: 560px){
@@ -291,9 +271,7 @@
     <header>
       <div>
         <h1>osu!mania — Score/Combo Archives (Font → PNG)</h1>
-        <div class="sub">
-          <span style="font-family:var(--mono)">preview</span>
-        </div>
+        <div class="sub"><span style="font-family:var(--mono)">preview</span></div>
       </div>
     </header>
 
@@ -367,18 +345,18 @@
 
           <div class="row">
             <div>
-              <label>Normal alignment (top anchored)</label>
+              <label>Normal alignment</label>
               <div class="row" style="gap:8px">
                 <div>
-                  <label style="margin-bottom:6px">Top Y</label>
+                  <label style="margin-bottom:6px">Global Y</label>
                   <input id="topY" type="number" step="1" value="0" />
                 </div>
                 <div>
-                  <label style="margin-bottom:6px">Dot/X extra Y</label>
+                  <label style="margin-bottom:6px">Dot/Comma/X extra Y</label>
                   <input id="dotXExtraY" type="number" step="1" value="3" />
                 </div>
               </div>
-              <div class="tiny">Applies to all normal sets (score/combo/scoreentry). My-style is untouched.</div>
+              <div class="tiny">All normal sets are true-vertically-centered by glyph bounds, then Y-shifted. My-style is untouched.</div>
             </div>
 
             <div>
@@ -393,7 +371,7 @@
                   <span>Make <b>x</b> transparent</span>
                 </div>
               </div>
-              <div class="tiny">Scoreentry base: 0–9, dot, x.</div>
+              <div class="tiny">Scoreentry base: 0–9, dot, comma, x.</div>
             </div>
           </div>
 
@@ -445,17 +423,13 @@
           <div class="sep"></div>
 
           <button id="btnDownload" class="btn">Download Archives</button>
-
           <div class="status" id="status">Status: <b>ready</b>.</div>
         </div>
       </section>
 
       <!-- PREVIEW -->
       <section class="card">
-        <div class="hd">
-          <b>Preview</b>
-        </div>
-
+        <div class="hd"><b>Preview</b></div>
         <div class="bd preview">
           <div class="previewSplit">
             <div class="pv">
@@ -466,9 +440,7 @@
                 </div>
                 <div class="s" id="tagScore">Normal preview</div>
               </div>
-              <div class="pvb">
-                <div class="thumbs score" id="pvScore"></div>
-              </div>
+              <div class="pvb"><div class="thumbs score" id="pvScore"></div></div>
             </div>
 
             <div class="pv">
@@ -479,9 +451,7 @@
                 </div>
                 <div class="s" id="tagCombo">Normal preview</div>
               </div>
-              <div class="pvb">
-                <div class="thumbs combo" id="pvCombo"></div>
-              </div>
+              <div class="pvb"><div class="thumbs combo" id="pvCombo"></div></div>
             </div>
           </div>
 
@@ -500,7 +470,9 @@
 
   const SCORE_GLYPHS = ['1','2','3','4','5','6','7','8','9','0','.', '%', 'x', ','];
   const COMBO_GLYPHS = ['1','2','3','4','5','6','7','8','9','0'];
-  const SCOREENTRY_BASE = ['1','2','3','4','5','6','7','8','9','0','.', 'x'];
+
+  // scoreentry: includes comma too (comma uses DOT artwork)
+  const SCOREENTRY_BASE = ['1','2','3','4','5','6','7','8','9','0','.', ',', 'x'];
 
   const scoreKeyForGlyph = (g) => {
     if (g >= '0' && g <= '9') return g;
@@ -511,12 +483,8 @@
     return g;
   };
 
-  // IMPORTANT:
-  // score-comma should use dot artwork; comma stays as filename key "comma", but drawn char becomes "."
-  const scoreDrawCharForKey = (key, originalGlyph) => {
-    if (key === 'comma') return '.';
-    return originalGlyph;
-  };
+  // score-comma uses dot artwork; comma filename stays "comma"
+  const scoreDrawCharForKey = (key, originalGlyph) => (key === 'comma' ? '.' : originalGlyph);
 
   const el = {
     scorePrefix: $('scorePrefix'),
@@ -582,16 +550,24 @@
 
   function clear(ctx,w,h){ ctx.clearRect(0,0,w,h); }
 
-  // NORMAL DRAW: top-anchored at Y=0 (plus offsets). This is what you asked for.
-  // - All normals use y = topY + offY (+ special extra for dot/x).
-  function drawTopAnchored(ctx, text, w, h, family, size, color, ox, oy, topY, extraY){
+  // FIX: proper vertical centering using glyph bounds (measureText),
+  // then apply a global Y shift + an extra drop for dot/comma/x.
+  function drawBBoxCentered(ctx, text, w, h, family, size, color, ox, oy, globalY, extraY){
     ctx.save();
     ctx.font = `${size}px "${family}", sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
+    ctx.textBaseline = 'alphabetic';
     ctx.imageSmoothingEnabled = true;
-    ctx.fillText(text, w/2 + ox, topY + oy + extraY);
+
+    const m = ctx.measureText(text);
+    const asc = m.actualBoundingBoxAscent ?? size * 0.8;
+    const desc = m.actualBoundingBoxDescent ?? size * 0.2;
+
+    // baseline so that (top..bottom) of glyph bbox is centered in canvas
+    const baseline = (h - (asc + desc)) / 2 + asc;
+
+    ctx.fillText(text, w/2 + ox, baseline + oy + globalY + extraY);
     ctx.restore();
   }
 
@@ -648,12 +624,11 @@
     }
   }
 
-  // General renderer: normal (@2x + 1x) + my-style
   function renderNormalAndMy({
     prefix, family,
     normalTextSize, myTextSize,
     color, ox, oy,
-    topY, dotXExtraY,
+    globalY, dotXExtraY,
     nW, nH, mySize, myPad,
     glyphs, keyForGlyph,
     normalDrawCharForKey,
@@ -669,7 +644,7 @@
     for(const g of glyphs){
       const key = keyForGlyph ? keyForGlyph(g) : g;
 
-      // dot/x extra drop (also applies to comma since comma draws dot)
+      // dot/x extra drop (comma draws dot too)
       const extra = (key === 'dot' || key === 'x' || key === 'comma') ? dotXExtraY : 0;
 
       // normal
@@ -685,14 +660,14 @@
         clear(ctx2,nW,nH);
 
         const drawChar = normalDrawCharForKey ? normalDrawCharForKey(key, g) : g;
-        drawTopAnchored(ctx2, drawChar, nW,nH, family, normalTextSize, color, ox, oy, topY, extra);
+        drawBBoxCentered(ctx2, drawChar, nW,nH, family, normalTextSize, color, ox, oy, globalY, extra);
 
         const c1 = downscale(c2, Math.max(1, Math.round(nW/2)), Math.max(1, Math.round(nH/2)));
         normal2x.set(`${pref}${key}@2x.png`, c2);
         normal1x.set(`${pref}${key}.png`, c1);
       }
 
-      // my-style (unchanged)
+      // my-style
       const ov = myOverrides?.[key] || null;
       if(ov?.type === 'empty'){
         const ce = makeCanvas(ov.w, ov.h);
@@ -711,11 +686,10 @@
     return { normal2x, normal1x, my };
   }
 
-  // Dedicated renderer for scoreentry: fixed image size 21x28 (@2x), and 1x downscale
   function renderEntry({
     prefix, family,
     textSize, color, ox, oy,
-    topY, dotXExtraY,
+    globalY, dotXExtraY,
     includeTransparentPercent,
     transparentX
   }){
@@ -735,8 +709,10 @@
       const key = scoreKeyForGlyph(g);
       const extra = (key === 'dot' || key === 'x' || key === 'comma') ? dotXExtraY : 0;
 
-      const makeEmpty = (g === '%') || (transparentX && g === 'x');
+      // scoreentry-comma MUST be dot artwork (draw ".")
+      const drawChar = (key === 'comma') ? '.' : g;
 
+      const makeEmpty = (g === '%') || (transparentX && g === 'x');
       if(makeEmpty){
         normal2x.set(`${pref}${key}@2x.png`, makeCanvas(W2,H2));
         normal1x.set(`${pref}${key}.png`, makeCanvas(W1,H1));
@@ -747,8 +723,7 @@
       const ctx2 = c2.getContext('2d');
       clear(ctx2,W2,H2);
 
-      const drawChar = (key === 'comma') ? '.' : g; // safe
-      drawTopAnchored(ctx2, drawChar, W2,H2, family, textSize, color, ox, oy, topY, extra);
+      drawBBoxCentered(ctx2, drawChar, W2,H2, family, textSize, color, ox, oy, globalY, extra);
 
       const c1 = downscale(c2, W1, H1);
       normal2x.set(`${pref}${key}@2x.png`, c2);
@@ -771,7 +746,7 @@
     const mySize = Math.max(1, parseInt(el.mySize.value||'350',10));
     const myPad = Math.max(0, parseInt(el.myPad.value||'6',10));
 
-    const topY = parseInt(el.topY.value||'0',10);
+    const globalY = parseInt(el.topY.value||'0',10);
     const dotXExtraY = parseInt(el.dotXExtraY.value||'3',10);
 
     const score = renderNormalAndMy({
@@ -782,14 +757,13 @@
       color: (el.scoreColor.value||'#fff').trim(),
       ox: parseInt(el.scoreOffX.value||'0',10),
       oy: parseInt(el.scoreOffY.value||'0',10),
-      topY, dotXExtraY,
+      globalY, dotXExtraY,
       nW, nH, mySize, myPad,
       glyphs: SCORE_GLYPHS,
       keyForGlyph: scoreKeyForGlyph,
       normalDrawCharForKey: scoreDrawCharForKey,
       myOverrides: {
-        // my-style score-percent: always 1000x1 empty transparent
-        percent: { type:'empty', w:1000, h:1 }
+        percent: { type:'empty', w:1000, h:1 } // my-style score-percent empty 1000x1
       }
     });
 
@@ -801,7 +775,7 @@
       color: (el.comboColor.value||'#fff').trim(),
       ox: parseInt(el.comboOffX.value||'0',10),
       oy: parseInt(el.comboOffY.value||'0',10),
-      topY, dotXExtraY,
+      globalY, dotXExtraY,
       nW, nH, mySize, myPad,
       glyphs: COMBO_GLYPHS
     });
@@ -809,8 +783,8 @@
     fillPreview(el.pvScore, score.normal2x);
     fillPreview(el.pvCombo, combo.normal2x);
 
-    el.infoScore.textContent = `${nW}×${nH} • top anchored (comma draws dot)`;
-    el.infoCombo.textContent = `${nW}×${nH} • top anchored`;
+    el.infoScore.textContent = `${nW}×${nH} • bbox-centered • dot/comma/x extraY`;
+    el.infoCombo.textContent = `${nW}×${nH} • bbox-centered`;
     el.tagScore.textContent = 'Normal @2x';
     el.tagCombo.textContent = 'Normal @2x';
 
@@ -832,7 +806,7 @@
       const mySize = Math.max(1, parseInt(el.mySize.value||'350',10));
       const myPad = Math.max(0, parseInt(el.myPad.value||'6',10));
 
-      const topY = parseInt(el.topY.value||'0',10);
+      const globalY = parseInt(el.topY.value||'0',10);
       const dotXExtraY = parseInt(el.dotXExtraY.value||'3',10);
 
       const score = renderNormalAndMy({
@@ -843,7 +817,7 @@
         color: (el.scoreColor.value||'#fff').trim(),
         ox: parseInt(el.scoreOffX.value||'0',10),
         oy: parseInt(el.scoreOffY.value||'0',10),
-        topY, dotXExtraY,
+        globalY, dotXExtraY,
         nW, nH, mySize, myPad,
         glyphs: SCORE_GLYPHS,
         keyForGlyph: scoreKeyForGlyph,
@@ -861,7 +835,7 @@
         color: (el.comboColor.value||'#fff').trim(),
         ox: parseInt(el.comboOffX.value||'0',10),
         oy: parseInt(el.comboOffY.value||'0',10),
-        topY, dotXExtraY,
+        globalY, dotXExtraY,
         nW, nH, mySize, myPad,
         glyphs: COMBO_GLYPHS
       });
@@ -873,29 +847,24 @@
         color: (el.scoreColor.value||'#fff').trim(),
         ox: parseInt(el.scoreOffX.value||'0',10),
         oy: parseInt(el.scoreOffY.value||'0',10),
-        topY, dotXExtraY,
+        globalY, dotXExtraY,
         includeTransparentPercent: !!el.entryTransparentPercent.checked,
         transparentX: !!el.entryTransparentX.checked
       });
 
       const zip = new JSZip();
-
-      // normal includes score + combo + scoreentry
       const normal = zip.folder('normal');
 
-      for(const [name, canvas] of score.normal2x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
-      for(const [name, canvas] of score.normal1x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
+      for(const [name, canvas] of score.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of score.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of combo.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of combo.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of entry.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of entry.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
 
-      for(const [name, canvas] of combo.normal2x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
-      for(const [name, canvas] of combo.normal1x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
-
-      for(const [name, canvas] of entry.normal2x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
-      for(const [name, canvas] of entry.normal1x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
-
-      // my-style includes ONLY score
       const my = zip.folder('my-style');
       const myScore = my.folder('score');
-      for(const [name, canvas] of score.my.entries()) myScore.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
+      for(const [name, canvas] of score.my.entries()) myScore.file(name, await canvasToBlob(canvas));
 
       setStatus('zipping');
 
@@ -941,8 +910,7 @@
     'topY','dotXExtraY',
     'scoreSize','scoreColor','scoreOffX','scoreOffY',
     'comboSize','comboColor','comboOffX','comboOffY',
-    'myScoreSize',
-    'scoreEntrySize'
+    'myScoreSize','scoreEntrySize'
   ];
   watch.forEach(id => $(id).addEventListener('input', schedulePreview));
   $('scoreFont').addEventListener('change', schedulePreview);

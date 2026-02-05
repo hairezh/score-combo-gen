@@ -272,6 +272,18 @@
       text-overflow:ellipsis;
       max-width:100%;
     }
+
+    .chk{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:8px 10px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      border-radius:12px;
+    }
+    .chk input{width:16px;height:16px}
+    .chk span{font-size:11.6px;color:var(--muted);line-height:1.25}
   </style>
 </head>
 <body>
@@ -302,6 +314,18 @@
             <div>
               <label>Combo prefix</label>
               <input id="comboPrefix" type="text" value="mania-combo-" />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div>
+              <label>Scoreentry prefix</label>
+              <input id="scoreEntryPrefix" type="text" value="scoreentry-" />
+            </div>
+            <div>
+              <label>Scoreentry size (21×28)</label>
+              <input id="scoreEntrySize" type="number" min="1" step="1" value="20" />
+              <div class="tiny">Only affects scoreentry.</div>
             </div>
           </div>
 
@@ -378,9 +402,18 @@
               <div class="tiny">Only affects my-style score.</div>
             </div>
             <div>
-              <label>My-style uses</label>
-              <input type="text" value="Score only (no combo)" readonly />
-              <div class="tiny">my-style exports only score folder.</div>
+              <label>Scoreentry transparency (optional)</label>
+              <div class="row" style="gap:8px">
+                <div class="chk">
+                  <input id="entryTransparentPercent" type="checkbox" checked />
+                  <span>Include transparent <b>%</b> (scoreentry-percent)</span>
+                </div>
+                <div class="chk">
+                  <input id="entryTransparentX" type="checkbox" />
+                  <span>Make <b>x</b> transparent</span>
+                </div>
+              </div>
+              <div class="tiny">Scoreentry base set: 0–9, dot, x. Toggle adds % as empty + can blank x.</div>
             </div>
           </div>
 
@@ -429,7 +462,7 @@
 
           <div class="tiny" style="margin-top:0">
             Preview always shows the <span style="font-family:var(--mono)">img @2x</span> set only.
-            (ZIP includes <span style="font-family:var(--mono)">normal 1x</span> and <span style="font-family:var(--mono)">my-style</span>.)
+            (ZIP includes <span style="font-family:var(--mono)">normal 1x</span>, <span style="font-family:var(--mono)">my-style</span> and <span style="font-family:var(--mono)">scoreentry</span>.)
           </div>
         </div>
       </section>
@@ -443,6 +476,9 @@
   const SCORE_GLYPHS = ['1','2','3','4','5','6','7','8','9','0','.', '%', 'x', ','];
   const COMBO_GLYPHS = ['1','2','3','4','5','6','7','8','9','0'];
 
+  // scoreentry base glyphs (0–9, dot, x); optional percent via toggle (as empty)
+  const SCOREENTRY_BASE = ['1','2','3','4','5','6','7','8','9','0','.', 'x'];
+
   const scoreKeyForGlyph = (g) => {
     if (g >= '0' && g <= '9') return g;
     if (g === '.') return 'dot';
@@ -452,9 +488,18 @@
     return g;
   };
 
+  // IMPORTANT CHANGE:
+  // score-comma should use dot artwork; comma stays as filename key "comma", but draw text becomes "."
+  const scoreDrawCharForKey = (key, originalGlyph) => {
+    if (key === 'comma') return '.';
+    return originalGlyph;
+  };
+
   const el = {
     scorePrefix: $('scorePrefix'),
     comboPrefix: $('comboPrefix'),
+    scoreEntryPrefix: $('scoreEntryPrefix'),
+
     scoreFont: $('scoreFont'),
     comboFont: $('comboFont'),
 
@@ -474,6 +519,10 @@
     comboOffY: $('comboOffY'),
 
     myScoreSize: $('myScoreSize'),
+
+    scoreEntrySize: $('scoreEntrySize'),
+    entryTransparentPercent: $('entryTransparentPercent'),
+    entryTransparentX: $('entryTransparentX'),
 
     btnDownload: $('btnDownload'),
     status: $('status'),
@@ -571,13 +620,18 @@
     }
   }
 
-  // Supports: myTextSize (separate size for my-style) and per-glyph overrides.
+  // General renderer: normal (@2x + 1x) + my-style
+  // - normalDrawCharForKey: lets us draw "." for comma, etc.
+  // - normalOverrides: { key: {type:'empty'} } for blank normals
+  // - myOverrides: { key: {type:'empty', w,h} } for blank/size override in my-style
   function renderNormalAndMy({
     prefix, family,
     normalTextSize, myTextSize,
     color, ox, oy,
     nW, nH, mySize, myPad,
     glyphs, keyForGlyph,
+    normalDrawCharForKey,
+    normalOverrides,
     myOverrides
   }){
     const pref = sanitizePrefix(prefix);
@@ -590,32 +644,86 @@
       const key = keyForGlyph ? keyForGlyph(g) : g;
 
       // normal
-      const c2 = makeCanvas(nW,nH);
-      const ctx2 = c2.getContext('2d');
-      clear(ctx2,nW,nH);
-      drawCentered(ctx2, g, nW,nH, family, normalTextSize, color, ox, oy);
+      const nOv = normalOverrides?.[key] || null;
+      if(nOv?.type === 'empty'){
+        const c2e = makeCanvas(nW,nH);
+        const c1e = makeCanvas(Math.max(1, Math.round(nW/2)), Math.max(1, Math.round(nH/2)));
+        normal2x.set(`${pref}${key}@2x.png`, c2e);
+        normal1x.set(`${pref}${key}.png`, c1e);
+      } else {
+        const c2 = makeCanvas(nW,nH);
+        const ctx2 = c2.getContext('2d');
+        clear(ctx2,nW,nH);
+        const drawChar = normalDrawCharForKey ? normalDrawCharForKey(key, g) : g;
+        drawCentered(ctx2, drawChar, nW,nH, family, normalTextSize, color, ox, oy);
 
-      const c1 = downscale(c2, Math.round(nW/2), Math.round(nH/2));
-      normal2x.set(`${pref}${key}@2x.png`, c2);
-      normal1x.set(`${pref}${key}.png`, c1);
+        const c1 = downscale(c2, Math.max(1, Math.round(nW/2)), Math.max(1, Math.round(nH/2)));
+        normal2x.set(`${pref}${key}@2x.png`, c2);
+        normal1x.set(`${pref}${key}.png`, c1);
+      }
 
       // my-style
       const ov = myOverrides?.[key] || null;
-
       if(ov?.type === 'empty'){
-        const ce = makeCanvas(ov.w, ov.h); // fully transparent
+        const ce = makeCanvas(ov.w, ov.h); // transparent
         my.set(`${pref}${key}.png`, ce);
       } else {
         const S = mySize;
         const cm = makeCanvas(S,S);
         const ctxm = cm.getContext('2d');
         clear(ctxm,S,S);
-        drawTopRight(ctxm, g, S,S, family, myTextSize, color, myPad, ox, oy);
+        const drawChar = normalDrawCharForKey ? normalDrawCharForKey(key, g) : g;
+        drawTopRight(ctxm, drawChar, S,S, family, myTextSize, color, myPad, ox, oy);
         my.set(`${pref}${key}.png`, cm);
       }
     }
 
     return { normal2x, normal1x, my };
+  }
+
+  // Dedicated renderer for scoreentry: fixed image size 21x28 (@2x), and 1x downscale
+  function renderEntry({
+    prefix, family,
+    textSize, color, ox, oy,
+    includeTransparentPercent,
+    transparentX
+  }){
+    const pref = sanitizePrefix(prefix);
+
+    const W2 = 21, H2 = 28;
+    const W1 = Math.max(1, Math.round(W2/2)); // 11
+    const H1 = Math.max(1, Math.round(H2/2)); // 14
+
+    const glyphs = [...SCOREENTRY_BASE];
+    if(includeTransparentPercent) glyphs.push('%');
+
+    const normal2x = new Map();
+    const normal1x = new Map();
+
+    for(const g of glyphs){
+      const key = scoreKeyForGlyph(g);
+
+      const makeEmpty = (g === '%') || (transparentX && g === 'x');
+
+      if(makeEmpty){
+        normal2x.set(`${pref}${key}@2x.png`, makeCanvas(W2,H2));
+        normal1x.set(`${pref}${key}.png`, makeCanvas(W1,H1));
+        continue;
+      }
+
+      const c2 = makeCanvas(W2,H2);
+      const ctx2 = c2.getContext('2d');
+      clear(ctx2,W2,H2);
+
+      const drawChar = (key === 'comma') ? '.' : g; // (not used for entry, but safe)
+      drawCentered(ctx2, drawChar, W2,H2, family, textSize, color, ox, oy);
+
+      const c1 = downscale(c2, W1, H1);
+      normal2x.set(`${pref}${key}@2x.png`, c2);
+      normal1x.set(`${pref}${key}.png`, c1);
+    }
+
+    return { normal2x, normal1x, dims: {W2,H2,W1,H1}, glyphs };
   }
 
   async function ensureFonts(){
@@ -642,8 +750,9 @@
       nW, nH, mySize, myPad,
       glyphs: SCORE_GLYPHS,
       keyForGlyph: scoreKeyForGlyph,
+      normalDrawCharForKey: scoreDrawCharForKey,
       myOverrides: {
-        // score-percent in my-style: always 1000x1 EMPTY transparent
+        // my-style score-percent is special: always 1000x1 empty transparent
         percent: { type:'empty', w:1000, h:1 }
       }
     });
@@ -652,7 +761,7 @@
       prefix: el.comboPrefix.value,
       family: fontCombo,
       normalTextSize: parseInt(el.comboSize.value||'52',10),
-      myTextSize: parseInt(el.comboSize.value||'52',10), // not used for export (my-style doesn't include combo), but harmless
+      myTextSize: parseInt(el.comboSize.value||'52',10),
       color: (el.comboColor.value||'#fff').trim(),
       ox: parseInt(el.comboOffX.value||'0',10),
       oy: parseInt(el.comboOffY.value||'0',10),
@@ -660,10 +769,11 @@
       glyphs: COMBO_GLYPHS
     });
 
+    // (scoreentry exists for export; preview stays compact as requested)
     fillPreview(el.pvScore, score.normal2x);
     fillPreview(el.pvCombo, combo.normal2x);
 
-    el.infoScore.textContent = `${nW}×${nH} • 0–9 + dot/percent/x/comma`;
+    el.infoScore.textContent = `${nW}×${nH} • 0–9 + dot/percent/x/comma (comma draws dot)`;
     el.infoCombo.textContent = `${nW}×${nH} • 0–9`;
     el.tagScore.textContent = 'Normal @2x';
     el.tagCombo.textContent = 'Normal @2x';
@@ -697,6 +807,7 @@
         nW, nH, mySize, myPad,
         glyphs: SCORE_GLYPHS,
         keyForGlyph: scoreKeyForGlyph,
+        normalDrawCharForKey: scoreDrawCharForKey,
         myOverrides: {
           percent: { type:'empty', w:1000, h:1 }
         }
@@ -714,14 +825,30 @@
         glyphs: COMBO_GLYPHS
       });
 
+      const entry = renderEntry({
+        prefix: el.scoreEntryPrefix.value,
+        family: fontScore,
+        textSize: parseInt(el.scoreEntrySize.value||'20',10),
+        color: (el.scoreColor.value||'#fff').trim(),
+        ox: parseInt(el.scoreOffX.value||'0',10),
+        oy: parseInt(el.scoreOffY.value||'0',10),
+        includeTransparentPercent: !!el.entryTransparentPercent.checked,
+        transparentX: !!el.entryTransparentX.checked
+      });
+
       const zip = new JSZip();
 
-      // normal includes score + combo (both @2x and 1x)
+      // normal includes score + combo + scoreentry
       const normal = zip.folder('normal');
+
       for(const [name, canvas] of score.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
       for(const [name, canvas] of score.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
+
       for(const [name, canvas] of combo.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
       for(const [name, canvas] of combo.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
+
+      for(const [name, canvas] of entry.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of entry.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
 
       // my-style includes ONLY score
       const my = zip.folder('my-style');
@@ -766,15 +893,19 @@
   el.btnDownload.addEventListener('click', downloadArchives);
 
   const watch = [
-    'scorePrefix','comboPrefix','scoreFont','comboFont',
+    'scorePrefix','comboPrefix','scoreEntryPrefix',
+    'scoreFont','comboFont',
     'nW','nH','mySize','myPad',
     'scoreSize','scoreColor','scoreOffX','scoreOffY',
     'comboSize','comboColor','comboOffX','comboOffY',
-    'myScoreSize'
+    'myScoreSize',
+    'scoreEntrySize'
   ];
   watch.forEach(id => $(id).addEventListener('input', schedulePreview));
   $('scoreFont').addEventListener('change', schedulePreview);
   $('comboFont').addEventListener('change', schedulePreview);
+  $('entryTransparentPercent').addEventListener('change', schedulePreview);
+  $('entryTransparentX').addEventListener('change', schedulePreview);
 
   (async () => {
     try{

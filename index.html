@@ -323,9 +323,9 @@
               <input id="scoreEntryPrefix" type="text" value="scoreentry-" />
             </div>
             <div>
-              <label>Scoreentry size (21×28)</label>
+              <label>Scoreentry size (text px)</label>
               <input id="scoreEntrySize" type="number" min="1" step="1" value="20" />
-              <div class="tiny">Only affects scoreentry.</div>
+              <div class="tiny">Image is always 21×28 (@2x).</div>
             </div>
           </div>
 
@@ -360,6 +360,40 @@
             <div>
               <label>padding</label>
               <input id="myPad" type="number" min="0" step="1" value="6" />
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="row">
+            <div>
+              <label>Normal alignment (top anchored)</label>
+              <div class="row" style="gap:8px">
+                <div>
+                  <label style="margin-bottom:6px">Top Y</label>
+                  <input id="topY" type="number" step="1" value="0" />
+                </div>
+                <div>
+                  <label style="margin-bottom:6px">Dot/X extra Y</label>
+                  <input id="dotXExtraY" type="number" step="1" value="3" />
+                </div>
+              </div>
+              <div class="tiny">Applies to all normal sets (score/combo/scoreentry). My-style is untouched.</div>
+            </div>
+
+            <div>
+              <label>Scoreentry transparency (optional)</label>
+              <div class="row" style="gap:8px">
+                <div class="chk">
+                  <input id="entryTransparentPercent" type="checkbox" checked />
+                  <span>Include transparent <b>%</b> (scoreentry-percent)</span>
+                </div>
+                <div class="chk">
+                  <input id="entryTransparentX" type="checkbox" />
+                  <span>Make <b>x</b> transparent</span>
+                </div>
+              </div>
+              <div class="tiny">Scoreentry base: 0–9, dot, x.</div>
             </div>
           </div>
 
@@ -402,18 +436,9 @@
               <div class="tiny">Only affects my-style score.</div>
             </div>
             <div>
-              <label>Scoreentry transparency (optional)</label>
-              <div class="row" style="gap:8px">
-                <div class="chk">
-                  <input id="entryTransparentPercent" type="checkbox" checked />
-                  <span>Include transparent <b>%</b> (scoreentry-percent)</span>
-                </div>
-                <div class="chk">
-                  <input id="entryTransparentX" type="checkbox" />
-                  <span>Make <b>x</b> transparent</span>
-                </div>
-              </div>
-              <div class="tiny">Scoreentry base set: 0–9, dot, x. Toggle adds % as empty + can blank x.</div>
+              <label>My-style uses</label>
+              <input type="text" value="Score only (no combo)" readonly />
+              <div class="tiny">my-style exports only score folder.</div>
             </div>
           </div>
 
@@ -475,8 +500,6 @@
 
   const SCORE_GLYPHS = ['1','2','3','4','5','6','7','8','9','0','.', '%', 'x', ','];
   const COMBO_GLYPHS = ['1','2','3','4','5','6','7','8','9','0'];
-
-  // scoreentry base glyphs (0–9, dot, x); optional percent via toggle (as empty)
   const SCOREENTRY_BASE = ['1','2','3','4','5','6','7','8','9','0','.', 'x'];
 
   const scoreKeyForGlyph = (g) => {
@@ -488,8 +511,8 @@
     return g;
   };
 
-  // IMPORTANT CHANGE:
-  // score-comma should use dot artwork; comma stays as filename key "comma", but draw text becomes "."
+  // IMPORTANT:
+  // score-comma should use dot artwork; comma stays as filename key "comma", but drawn char becomes "."
   const scoreDrawCharForKey = (key, originalGlyph) => {
     if (key === 'comma') return '.';
     return originalGlyph;
@@ -507,6 +530,9 @@
     nH: $('nH'),
     mySize: $('mySize'),
     myPad: $('myPad'),
+
+    topY: $('topY'),
+    dotXExtraY: $('dotXExtraY'),
 
     scoreSize: $('scoreSize'),
     scoreColor: $('scoreColor'),
@@ -556,14 +582,16 @@
 
   function clear(ctx,w,h){ ctx.clearRect(0,0,w,h); }
 
-  function drawCentered(ctx, text, w, h, family, size, color, ox, oy){
+  // NORMAL DRAW: top-anchored at Y=0 (plus offsets). This is what you asked for.
+  // - All normals use y = topY + offY (+ special extra for dot/x).
+  function drawTopAnchored(ctx, text, w, h, family, size, color, ox, oy, topY, extraY){
     ctx.save();
     ctx.font = `${size}px "${family}", sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.textBaseline = 'top';
     ctx.imageSmoothingEnabled = true;
-    ctx.fillText(text, w/2 + ox, h/2 + oy);
+    ctx.fillText(text, w/2 + ox, topY + oy + extraY);
     ctx.restore();
   }
 
@@ -621,13 +649,11 @@
   }
 
   // General renderer: normal (@2x + 1x) + my-style
-  // - normalDrawCharForKey: lets us draw "." for comma, etc.
-  // - normalOverrides: { key: {type:'empty'} } for blank normals
-  // - myOverrides: { key: {type:'empty', w,h} } for blank/size override in my-style
   function renderNormalAndMy({
     prefix, family,
     normalTextSize, myTextSize,
     color, ox, oy,
+    topY, dotXExtraY,
     nW, nH, mySize, myPad,
     glyphs, keyForGlyph,
     normalDrawCharForKey,
@@ -643,6 +669,9 @@
     for(const g of glyphs){
       const key = keyForGlyph ? keyForGlyph(g) : g;
 
+      // dot/x extra drop (also applies to comma since comma draws dot)
+      const extra = (key === 'dot' || key === 'x' || key === 'comma') ? dotXExtraY : 0;
+
       // normal
       const nOv = normalOverrides?.[key] || null;
       if(nOv?.type === 'empty'){
@@ -654,18 +683,19 @@
         const c2 = makeCanvas(nW,nH);
         const ctx2 = c2.getContext('2d');
         clear(ctx2,nW,nH);
+
         const drawChar = normalDrawCharForKey ? normalDrawCharForKey(key, g) : g;
-        drawCentered(ctx2, drawChar, nW,nH, family, normalTextSize, color, ox, oy);
+        drawTopAnchored(ctx2, drawChar, nW,nH, family, normalTextSize, color, ox, oy, topY, extra);
 
         const c1 = downscale(c2, Math.max(1, Math.round(nW/2)), Math.max(1, Math.round(nH/2)));
         normal2x.set(`${pref}${key}@2x.png`, c2);
         normal1x.set(`${pref}${key}.png`, c1);
       }
 
-      // my-style
+      // my-style (unchanged)
       const ov = myOverrides?.[key] || null;
       if(ov?.type === 'empty'){
-        const ce = makeCanvas(ov.w, ov.h); // transparent
+        const ce = makeCanvas(ov.w, ov.h);
         my.set(`${pref}${key}.png`, ce);
       } else {
         const S = mySize;
@@ -685,6 +715,7 @@
   function renderEntry({
     prefix, family,
     textSize, color, ox, oy,
+    topY, dotXExtraY,
     includeTransparentPercent,
     transparentX
   }){
@@ -702,6 +733,7 @@
 
     for(const g of glyphs){
       const key = scoreKeyForGlyph(g);
+      const extra = (key === 'dot' || key === 'x' || key === 'comma') ? dotXExtraY : 0;
 
       const makeEmpty = (g === '%') || (transparentX && g === 'x');
 
@@ -715,15 +747,15 @@
       const ctx2 = c2.getContext('2d');
       clear(ctx2,W2,H2);
 
-      const drawChar = (key === 'comma') ? '.' : g; // (not used for entry, but safe)
-      drawCentered(ctx2, drawChar, W2,H2, family, textSize, color, ox, oy);
+      const drawChar = (key === 'comma') ? '.' : g; // safe
+      drawTopAnchored(ctx2, drawChar, W2,H2, family, textSize, color, ox, oy, topY, extra);
 
       const c1 = downscale(c2, W1, H1);
       normal2x.set(`${pref}${key}@2x.png`, c2);
       normal1x.set(`${pref}${key}.png`, c1);
     }
 
-    return { normal2x, normal1x, dims: {W2,H2,W1,H1}, glyphs };
+    return { normal2x, normal1x };
   }
 
   async function ensureFonts(){
@@ -739,6 +771,9 @@
     const mySize = Math.max(1, parseInt(el.mySize.value||'350',10));
     const myPad = Math.max(0, parseInt(el.myPad.value||'6',10));
 
+    const topY = parseInt(el.topY.value||'0',10);
+    const dotXExtraY = parseInt(el.dotXExtraY.value||'3',10);
+
     const score = renderNormalAndMy({
       prefix: el.scorePrefix.value,
       family: fontScore,
@@ -747,12 +782,13 @@
       color: (el.scoreColor.value||'#fff').trim(),
       ox: parseInt(el.scoreOffX.value||'0',10),
       oy: parseInt(el.scoreOffY.value||'0',10),
+      topY, dotXExtraY,
       nW, nH, mySize, myPad,
       glyphs: SCORE_GLYPHS,
       keyForGlyph: scoreKeyForGlyph,
       normalDrawCharForKey: scoreDrawCharForKey,
       myOverrides: {
-        // my-style score-percent is special: always 1000x1 empty transparent
+        // my-style score-percent: always 1000x1 empty transparent
         percent: { type:'empty', w:1000, h:1 }
       }
     });
@@ -765,16 +801,16 @@
       color: (el.comboColor.value||'#fff').trim(),
       ox: parseInt(el.comboOffX.value||'0',10),
       oy: parseInt(el.comboOffY.value||'0',10),
+      topY, dotXExtraY,
       nW, nH, mySize, myPad,
       glyphs: COMBO_GLYPHS
     });
 
-    // (scoreentry exists for export; preview stays compact as requested)
     fillPreview(el.pvScore, score.normal2x);
     fillPreview(el.pvCombo, combo.normal2x);
 
-    el.infoScore.textContent = `${nW}×${nH} • 0–9 + dot/percent/x/comma (comma draws dot)`;
-    el.infoCombo.textContent = `${nW}×${nH} • 0–9`;
+    el.infoScore.textContent = `${nW}×${nH} • top anchored (comma draws dot)`;
+    el.infoCombo.textContent = `${nW}×${nH} • top anchored`;
     el.tagScore.textContent = 'Normal @2x';
     el.tagCombo.textContent = 'Normal @2x';
 
@@ -796,6 +832,9 @@
       const mySize = Math.max(1, parseInt(el.mySize.value||'350',10));
       const myPad = Math.max(0, parseInt(el.myPad.value||'6',10));
 
+      const topY = parseInt(el.topY.value||'0',10);
+      const dotXExtraY = parseInt(el.dotXExtraY.value||'3',10);
+
       const score = renderNormalAndMy({
         prefix: el.scorePrefix.value,
         family: fontScore,
@@ -804,6 +843,7 @@
         color: (el.scoreColor.value||'#fff').trim(),
         ox: parseInt(el.scoreOffX.value||'0',10),
         oy: parseInt(el.scoreOffY.value||'0',10),
+        topY, dotXExtraY,
         nW, nH, mySize, myPad,
         glyphs: SCORE_GLYPHS,
         keyForGlyph: scoreKeyForGlyph,
@@ -821,6 +861,7 @@
         color: (el.comboColor.value||'#fff').trim(),
         ox: parseInt(el.comboOffX.value||'0',10),
         oy: parseInt(el.comboOffY.value||'0',10),
+        topY, dotXExtraY,
         nW, nH, mySize, myPad,
         glyphs: COMBO_GLYPHS
       });
@@ -832,6 +873,7 @@
         color: (el.scoreColor.value||'#fff').trim(),
         ox: parseInt(el.scoreOffX.value||'0',10),
         oy: parseInt(el.scoreOffY.value||'0',10),
+        topY, dotXExtraY,
         includeTransparentPercent: !!el.entryTransparentPercent.checked,
         transparentX: !!el.entryTransparentX.checked
       });
@@ -841,19 +883,19 @@
       // normal includes score + combo + scoreentry
       const normal = zip.folder('normal');
 
-      for(const [name, canvas] of score.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
-      for(const [name, canvas] of score.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of score.normal2x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
+      for(const [name, canvas] of score.normal1x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
 
-      for(const [name, canvas] of combo.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
-      for(const [name, canvas] of combo.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of combo.normal2x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
+      for(const [name, canvas] of combo.normal1x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
 
-      for(const [name, canvas] of entry.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
-      for(const [name, canvas] of entry.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of entry.normal2x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
+      for(const [name, canvas] of entry.normal1x.entries()) normal.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
 
       // my-style includes ONLY score
       const my = zip.folder('my-style');
       const myScore = my.folder('score');
-      for(const [name, canvas] of score.my.entries()) myScore.file(name, await canvasToBlob(canvas));
+      for(const [name, canvas] of score.my.entries()) myScore.file(name, await new Promise(r=>canvas.toBlob(r,'image/png')));
 
       setStatus('zipping');
 
@@ -896,6 +938,7 @@
     'scorePrefix','comboPrefix','scoreEntryPrefix',
     'scoreFont','comboFont',
     'nW','nH','mySize','myPad',
+    'topY','dotXExtraY',
     'scoreSize','scoreColor','scoreOffX','scoreOffY',
     'comboSize','comboColor','comboOffX','comboOffY',
     'myScoreSize',

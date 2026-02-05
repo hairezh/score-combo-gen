@@ -328,7 +328,6 @@
 
           <div class="sep"></div>
 
-          <!-- FIXED: properly closed columns inside row3 -->
           <div class="row3">
             <div>
               <label>Img Size</label>
@@ -416,7 +415,6 @@
                   <div class="t">Combo</div>
                   <div class="s" id="infoCombo">—</div>
                 </div>
-                <!-- FIX: label text only (doesn't affect code) -->
                 <div class="s" id="tagCombo">Normal preview</div>
               </div>
               <div class="pvb">
@@ -567,7 +565,8 @@
     }
   }
 
-  function renderNormalAndMy({prefix, family, size, color, ox, oy, nW, nH, mySize, myPad, glyphs, keyForGlyph}){
+  // NEW: supports a per-glyph override for my-style (e.g. percent -> 1000x1 empty)
+  function renderNormalAndMy({prefix, family, size, color, ox, oy, nW, nH, mySize, myPad, glyphs, keyForGlyph, myOverrides}){
     const pref = sanitizePrefix(prefix);
 
     const normal2x = new Map();
@@ -577,22 +576,31 @@
     for(const g of glyphs){
       const key = keyForGlyph ? keyForGlyph(g) : g;
 
+      // normal
       const c2 = makeCanvas(nW,nH);
       const ctx2 = c2.getContext('2d');
       clear(ctx2,nW,nH);
       drawCentered(ctx2, g, nW,nH, family, size, color, ox, oy);
 
       const c1 = downscale(c2, Math.round(nW/2), Math.round(nH/2));
-
       normal2x.set(`${pref}${key}@2x.png`, c2);
       normal1x.set(`${pref}${key}.png`, c1);
 
-      const S = mySize;
-      const cm = makeCanvas(S,S);
-      const ctxm = cm.getContext('2d');
-      clear(ctxm,S,S);
-      drawTopRight(ctxm, g, S,S, family, size, color, myPad, ox, oy);
-      my.set(`${pref}${key}.png`, cm);
+      // my-style (with overrides)
+      const ov = myOverrides?.[key] || null;
+
+      if(ov?.type === 'empty'){
+        const ce = makeCanvas(ov.w, ov.h);
+        // leave fully transparent
+        my.set(`${pref}${key}.png`, ce);
+      } else {
+        const S = mySize;
+        const cm = makeCanvas(S,S);
+        const ctxm = cm.getContext('2d');
+        clear(ctxm,S,S);
+        drawTopRight(ctxm, g, S,S, family, size, color, myPad, ox, oy);
+        my.set(`${pref}${key}.png`, cm);
+      }
     }
 
     return { normal2x, normal1x, my };
@@ -620,7 +628,11 @@
       oy: parseInt(el.scoreOffY.value||'0',10),
       nW, nH, mySize, myPad,
       glyphs: SCORE_GLYPHS,
-      keyForGlyph: scoreKeyForGlyph
+      keyForGlyph: scoreKeyForGlyph,
+      myOverrides: {
+        // score-percent: always 1000x1 empty transparent in my-style
+        percent: { type:'empty', w:1000, h:1 }
+      }
     });
 
     const combo = renderNormalAndMy({
@@ -632,6 +644,7 @@
       oy: parseInt(el.comboOffY.value||'0',10),
       nW, nH, mySize, myPad,
       glyphs: COMBO_GLYPHS
+      // no overrides needed for preview
     });
 
     fillPreview(el.pvScore, score.normal2x);
@@ -669,7 +682,11 @@
         oy: parseInt(el.scoreOffY.value||'0',10),
         nW, nH, mySize, myPad,
         glyphs: SCORE_GLYPHS,
-        keyForGlyph: scoreKeyForGlyph
+        keyForGlyph: scoreKeyForGlyph,
+        myOverrides: {
+          // score-percent: always 1000x1 empty transparent in my-style
+          percent: { type:'empty', w:1000, h:1 }
+        }
       });
 
       const combo = renderNormalAndMy({
@@ -691,12 +708,10 @@
       for(const [name, canvas] of combo.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
       for(const [name, canvas] of combo.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
 
+      // UPDATED: my-style contains ONLY score (no combo folder)
       const my = zip.folder('my-style');
       const myScore = my.folder('score');
-      const myCombo = my.folder('combo');
-
       for(const [name, canvas] of score.my.entries()) myScore.file(name, await canvasToBlob(canvas));
-      for(const [name, canvas] of combo.my.entries()) myCombo.file(name, await canvasToBlob(canvas));
 
       setStatus('zipping');
 

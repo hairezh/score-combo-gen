@@ -10,246 +10,349 @@
 
   <style>
     :root{
-      --fg:#f6f0f7;
-      --muted:rgba(255,255,255,.68);
+      --fg:#e9e9ee;
+      --muted:rgba(233,233,238,.62);
+      --muted2:rgba(233,233,238,.40);
       --border:rgba(255,255,255,.12);
-      --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.03);
-      --shadow:0 18px 55px rgba(0,0,0,.55);
+      --panel:rgba(0,0,0,.44);
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
       --r:14px;
-      --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
-      --sans: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Apple Color Emoji","Segoe UI Emoji";
 
-      --pink1: rgba(255, 86, 168, .18);
-      --pink2: rgba(255, 140, 215, .12);
-      --pink3: rgba(210, 80, 255, .10);
-      --btn: rgba(255, 120, 200, .22);
-      --btnHover: rgba(255, 120, 200, .28);
+      --dockW:62px;
+      --gap:10px;
 
-      --bgDim: .35;
+      --rowLabel: 205px;
+      --inputPadY: 9px;
+      --inputPadX: 10px;
+
+      color-scheme: dark;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
 
     body{
       margin:0;
-      font-family:var(--sans);
       color:var(--fg);
-      background:#08070a;
+      font: 14px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+      background-image: url("https://i.pinimg.com/originals/f5/93/a4/f593a4f4932080fb7b43c6ae96d1a73d.gif");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
       overflow:hidden;
     }
 
     body::before{
       content:"";
-      position:fixed;
-      inset:0;
+      position:fixed; inset:0;
+      pointer-events:none;
       background:
-        linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.80)),
-        url("https://wallpapercave.com/wp/wp7789919.jpg");
-      background-size:cover;
-      background-position:center;
-      filter: brightness(var(--bgDim)) saturate(1.05);
-      transform: translateZ(0);
-      z-index:-2;
+        radial-gradient(900px 520px at 15% 10%, rgba(0,0,0,.16), transparent 55%),
+        radial-gradient(900px 520px at 85% 20%, rgba(0,0,0,.16), transparent 55%),
+        linear-gradient(180deg, rgba(0,0,0,.58), rgba(0,0,0,.56));
+      backdrop-filter: blur(0.6px);
     }
 
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
-      background:
-        radial-gradient(1200px 900px at 18% 12%, var(--pink1), transparent 58%),
-        radial-gradient(900px 700px at 78% 26%, var(--pink2), transparent 62%),
-        radial-gradient(1000px 800px at 55% 88%, var(--pink3), transparent 60%);
-      z-index:-1;
-      pointer-events:none;
+    /* Scrollbar */
+    *{
+      scrollbar-width: thin;
+      scrollbar-color: rgba(220,220,230,.30) rgba(0,0,0,.20);
     }
+    *::-webkit-scrollbar{ width:10px; height:10px; }
+    *::-webkit-scrollbar-track{ background: rgba(0,0,0,.20); border-radius: 10px; }
+    *::-webkit-scrollbar-thumb{
+      background: rgba(220,220,230,.26);
+      border: 2px solid rgba(0,0,0,.20);
+      border-radius: 10px;
+    }
+    *::-webkit-scrollbar-thumb:hover{ background: rgba(220,220,230,.40); }
 
     .app{
-      height:100vh;
+      position:relative;
+      z-index:1;
+      height:100%;
       display:flex;
       flex-direction:column;
-      padding:14px;
-      gap:12px;
     }
 
-    h1{margin:0;font-size:14px;letter-spacing:.2px}
-    .sub{color:var(--muted);font-size:11px;line-height:1.2}
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      background: rgba(0,0,0,.38);
+      backdrop-filter: blur(3px);
+      will-change: transform;
+      transform: translateZ(0);
+    }
 
-    .grid{
-      flex:1;
-      min-height:0;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 0;
+    }
+    .brand img{
+      width:30px;
+      height:30px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(0,0,0,.25);
+      box-shadow: 0 8px 20px rgba(0,0,0,.35);
+      object-fit: cover;
+    }
+    .brand .title{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .brand .title b{
+      font-weight:900;
+      font-size:13px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand .title span{
+      font-size:12px;
+      color:var(--muted2);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .tools{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .badge{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: rgba(233,233,238,.75);
+      font-weight:900;
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .btn{
+      cursor:pointer;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: rgba(233,233,238,.78);
+      font-weight:900;
+      transition:110ms linear;
+      user-select:none;
+    }
+    .btn:hover{
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      color: rgba(233,233,238,.95);
+    }
+    .btn.primary{
+      background: rgba(255,255,255,.10);
+      border-color: rgba(255,255,255,.16);
+      color: rgba(233,233,238,.95);
+    }
+
+    .layout{
+      flex:1; min-height:0;
       display:grid;
-      grid-template-columns: 390px 1fr;
-      gap:12px;
+      grid-template-columns: var(--dockW) 1fr;
+      overflow:hidden;
     }
-    @media (max-width: 980px){
-      body{overflow:auto}
-      .app{height:auto; min-height:100vh}
-      .grid{grid-template-columns:1fr}
+
+    /* ===== Sidebar dock ===== */
+    .dock{
+      border-right:1px solid var(--border);
+      background: rgba(0,0,0,.38);
+      backdrop-filter: blur(3px);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      padding:10px 8px;
+      min-height:0;
+      overflow:auto;
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    .dockGroup{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+      padding-bottom:10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .dockGroup:last-child{ border-bottom:0; padding-bottom:0; }
+
+    .icoBtn{
+      width:46px;
+      height:46px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: rgba(233,233,238,.78);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      user-select:none;
+      transition:110ms linear;
+      position:relative;
+      will-change: transform;
+      transform: translateZ(0);
+    }
+    .icoBtn:hover{
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      color: rgba(233,233,238,.95);
+      transform: translateY(-1px) translateZ(0);
+    }
+    .icoBtn.active{
+      border-color: rgba(255,255,255,.20);
+      background: rgba(255,255,255,.10);
+      color: rgba(233,233,238,.98);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    .tip{
+      position:absolute;
+      left:58px;
+      top:50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,.70);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:12px;
+      padding:6px 10px;
+      font-size:12px;
+      color: rgba(233,233,238,.92);
+      white-space:nowrap;
+      opacity:0;
+      pointer-events:none;
+      transition:110ms linear;
+      backdrop-filter: blur(3px);
+    }
+    .icoBtn:hover .tip{ opacity:1; }
+
+    .miniLabel{
+      font-size:11px;
+      color: var(--muted2);
+      text-align:center;
+      line-height:1.2;
+    }
+
+    /* ===== Main ===== */
+    .main{
+      min-height:0;
+      padding:10px;
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:10px;
+      overflow:hidden;
+      align-items:stretch;
     }
 
     .card{
-      min-height:0;
-      background:linear-gradient(180deg, var(--panel), var(--panel2));
       border:1px solid var(--border);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
+      background: var(--panel);
+      backdrop-filter: blur(3px);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
       overflow:hidden;
+      min-height:0;
       display:flex;
       flex-direction:column;
-      backdrop-filter: blur(0.5px);
+      will-change: transform;
+      transform: translateZ(0);
     }
 
-    .hd{
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
+    .cardHead{
+      padding:10px 10px 8px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      backdrop-filter: blur(4px);
     }
-    .hd b{font-size:12.5px}
 
-    .bd{padding:12px;overflow:auto;}
-    .bd.preview{
-      overflow:hidden !important;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+    .cardBody{
+      padding:10px;
+      overflow:auto;
       min-height:0;
+      flex:1;
     }
 
-    label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}
+    /* ===== Form pieces ===== */
+    .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .row3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+    .sep{ height:1px; background: rgba(255,255,255,.10); margin: 10px 0; }
+
+    label{
+      display:block;
+      font-size:12px;
+      color: rgba(233,233,238,.80);
+      font-weight:900;
+      user-select:none;
+      margin-bottom:6px;
+    }
+
     input[type="text"], input[type="number"]{
       width:100%;
-      padding:8px 9px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.26);
-      color:var(--fg);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;
+      background: rgba(0,0,0,.26);
+      color: rgba(233,233,238,.95);
+      padding: var(--inputPadY) var(--inputPadX);
       outline:none;
-      font-size:12px;
+      font:inherit;
     }
 
     input[type="file"]{
       width:100%;
-      padding:8px 9px;
-      border-radius:12px;
-      border:1px dashed var(--border);
-      background:rgba(0,0,0,.22);
-      color:var(--muted);
-      font-size:12px;
+      border:1px dashed rgba(255,255,255,.16);
+      border-radius:14px;
+      background: rgba(0,0,0,.22);
+      color: rgba(233,233,238,.70);
+      padding: var(--inputPadY) var(--inputPadX);
+      outline:none;
+      font:inherit;
     }
     input[type="file"]::file-selector-button{
-      background:#000;
-      color:#fff;
-      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.10);
+      color: rgba(233,233,238,.95);
+      border:1px solid rgba(255,255,255,.16);
       border-radius:999px;
       padding:7px 10px;
       margin-right:10px;
       cursor:pointer;
-      font-weight:800;
-    }
-    input[type="file"]::file-selector-button:hover{border-color:rgba(255,255,255,.32);}
-
-    .row{display:grid;grid-template-columns:1fr 1fr; gap:10px}
-    .row3{display:grid;grid-template-columns:1fr 1fr 1fr; gap:10px}
-    .sep{height:1px;background:var(--border);margin:10px 0}
-
-    .btn{
-      border:1px solid var(--border);
-      background:var(--btn);
-      color:var(--fg);
-      padding:10px 12px;
-      border-radius:999px;
-      cursor:pointer;
       font-weight:900;
-      width:100%;
     }
-    .btn:hover{background:var(--btnHover)}
-
-    .status{margin-top:8px;font-size:11.5px;color:var(--muted)}
-    .status b{color:var(--fg)}
-
-    .previewSplit{
-      flex:1;
-      min-height:0;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    @media (max-width: 980px){ .previewSplit{grid-template-columns:1fr} }
-
-    .pv{
-      border:1px solid var(--border);
-      border-radius:14px;
-      overflow:hidden;
-      background:rgba(0,0,0,.20);
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-    }
-    .pvh{
-      padding:8px 10px;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .pvh .t{font-size:12px;font-weight:900}
-    .pvh .s{font-size:11px;color:var(--muted)}
-
-    .pvb{
-      padding:10px;
-      overflow:hidden;
-      flex:1;
-      min-height:0;
-      display:flex;
-      align-items:flex-start;
-    }
-
-    .thumbs{
-      width:100%;
-      display:grid;
-      gap:8px;
-      align-content:start;
-      justify-items:stretch;
-    }
-    .thumbs.score{grid-template-columns: repeat(7, minmax(0, 1fr));}
-    .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
-    @media (max-width: 1160px){
-      .thumbs.score{grid-template-columns: repeat(6, minmax(0, 1fr));}
-      .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
-    }
-    @media (max-width: 560px){
-      .thumbs.score{grid-template-columns: repeat(5, minmax(0, 1fr));}
-      .thumbs.combo{grid-template-columns: repeat(5, minmax(0, 1fr));}
-    }
-
-    .thumb{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:5px;
-      padding:7px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.035);
-      text-align:center;
-    }
-    .thumb canvas{display:block}
-    .cap{
-      font-family:var(--mono);
-      font-size:10px;
-      color:var(--muted);
-      line-height:1.1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width:100%;
+    input[type="file"]::file-selector-button:hover{
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.14);
     }
 
     .chk{
@@ -261,142 +364,302 @@
       background:rgba(0,0,0,.18);
       border-radius:12px;
     }
-    .chk input{width:16px;height:16px}
-    .chk span{font-size:11.4px;color:var(--muted);line-height:1.25}
+    .chk input{ width:16px; height:16px; }
+    .chk span{ font-size:12px; color: rgba(233,233,238,.70); font-weight:900; }
+
+    .statusLine{
+      margin-top:8px;
+      font-size:12px;
+      color: rgba(233,233,238,.70);
+      font-weight:900;
+    }
+    .statusLine b{ color: rgba(233,233,238,.95); }
+
+    /* ===== Preview panes ===== */
+    .previewSplit{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      min-height:0;
+      height: 100%;
+    }
+
+    .pv{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;
+      overflow:hidden;
+      background: rgba(0,0,0,.20);
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .pvh{
+      padding:8px 10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: rgba(0,0,0,.18);
+    }
+    .pvh .t{ font-size:12px; font-weight:900; color: rgba(233,233,238,.95); }
+    .pvh .s{ font-size:12px; color: rgba(233,233,238,.62); font-weight:900; }
+
+    .pvb{
+      padding:10px;
+      overflow:auto;
+      flex:1;
+      min-height:0;
+    }
+
+    .thumbs{
+      width:100%;
+      display:grid;
+      gap:8px;
+      align-content:start;
+      justify-items:stretch;
+    }
+    .thumbs.score{ grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .thumbs.combo{ grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+    .thumb{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:5px;
+      padding:7px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.035);
+      text-align:center;
+    }
+    .thumb canvas{ display:block; max-width:100%; height:auto; }
+    .cap{
+      font-size:10px;
+      color: rgba(233,233,238,.62);
+      line-height:1.1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+
+    .hint{
+      margin-top:8px;
+      font-size:12px;
+      color: rgba(233,233,238,.50);
+      font-weight:900;
+    }
+
+    @media (max-width: 980px){
+      body{ overflow:auto; }
+      .layout{ grid-template-columns: 1fr; }
+      .dock{
+        flex-direction:row;
+        border-right:0;
+        border-bottom:1px solid var(--border);
+        padding:10px;
+        gap:10px;
+      }
+      .dockGroup{
+        flex-direction:row;
+        border-bottom:0;
+        padding-bottom:0;
+        width:auto;
+      }
+      .icoBtn .tip{ display:none; }
+      .main{ grid-template-columns: 1fr; }
+      .previewSplit{ grid-template-columns: 1fr; }
+    }
   </style>
 </head>
+
 <body>
   <div class="app">
-    <header>
-      <div>
-        <h1>osu!mania — prefixes</h1>
-        <div class="sub"><span style="font-family:var(--mono)">preview</span></div>
+
+    <!-- TOPBAR (igual do primeiro) -->
+    <div class="topbar">
+      <div class="brand">
+        <img alt="icon" src="https://i.pinimg.com/originals/da/b4/cb/dab4cbf31e4e8d7688b0e830d5d640f1.gif">
+        <div class="title">
+          <b>prefix edit</b>
+          <span>osu!mania — prefixes</span>
+        </div>
       </div>
-    </header>
 
-    <div class="grid">
-      <!-- SETTINGS -->
-      <section class="card">
-        <div class="hd"><b>Settings</b></div>
+      <div class="tools">
+        <span class="badge" id="status">Status: <b>ready</b>.</span>
+        <button class="btn primary" id="btnDownload" type="button">Download Archives</button>
+      </div>
+    </div>
 
-        <div class="bd">
-          <div class="row">
-            <div>
-              <label>Score prefix</label>
-              <input id="scorePrefix" type="text" value="score-" />
-            </div>
-            <div>
-              <label>Combo prefix</label>
-              <input id="comboPrefix" type="text" value="mania-combo-" />
-            </div>
-          </div>
+    <div class="layout">
+      <!-- DOCK (visual do primeiro) -->
+      <aside class="dock">
+        <div class="dockGroup">
+          <button class="icoBtn active" type="button" title="Settings">
+            <span aria-hidden="true">⚙️</span>
+            <span class="tip">Settings</span>
+          </button>
 
-          <div class="row" style="margin-top:10px;">
-            <div>
-              <label>Scoreentry prefix</label>
-              <input id="scoreEntryPrefix" type="text" value="scoreentry-" />
-            </div>
-            <div>
-              <label>Scoreentry size</label>
-              <input id="scoreEntrySize" type="number" min="1" step="1" value="20" />
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:10px;">
-            <div>
-              <label>Score font</label>
-              <input id="scoreFont" type="file" accept=".ttf,.otf" />
-            </div>
-            <div>
-              <label>Combo font</label>
-              <input id="comboFont" type="file" accept=".ttf,.otf" />
-            </div>
-          </div>
-
-          <div class="sep"></div>
-
-          <div class="row">
-            <div>
-              <label>Img size (score/combo)</label>
-              <div class="row" style="gap:8px">
-                <input id="nW" type="number" min="1" step="1" value="44" />
-                <input id="nH" type="number" min="1" step="1" value="66" />
-              </div>
-            </div>
-            <div>
-              <label>Dot/Comma/X tweak</label>
-              <div class="row" style="gap:8px">
-                <input id="dotXExtraY" type="number" step="1" value="3" />
-                <input id="centerBias" type="number" step="0.01" value="1.00" />
-              </div>
-              <div class="sub">extraY • bias</div>
-            </div>
-          </div>
-
-          <div class="sep"></div>
-
-          <div class="row">
-            <div>
-              <label>Score size / color</label>
-              <div class="row" style="gap:8px">
-                <input id="scoreSize" type="number" min="1" step="1" value="52" />
-                <input id="scoreColor" type="text" value="#FFFFFF" />
-              </div>
-            </div>
-
-            <div>
-              <label>Combo size / color</label>
-              <div class="row" style="gap:8px">
-                <input id="comboSize" type="number" min="1" step="1" value="52" />
-                <input id="comboColor" type="text" value="#FFFFFF" />
-              </div>
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:10px;">
-            <div class="chk">
-              <input id="entryTransparentPercent" type="checkbox" checked />
-              <span>scoreentry-percent (transparent)</span>
-            </div>
-            <div class="chk">
-              <input id="entryTransparentX" type="checkbox" />
-              <span>scoreentry-x (transparent)</span>
-            </div>
-          </div>
-
-          <div class="sep"></div>
-
-          <button id="btnDownload" class="btn">Download Archives</button>
-          <div class="status" id="status">Status: <b>ready</b>.</div>
+          <button class="icoBtn" type="button" title="Preview" onclick="document.getElementById('previewCard')?.scrollIntoView({behavior:'smooth', block:'start'})">
+            <span aria-hidden="true">👁️</span>
+            <span class="tip">Preview</span>
+          </button>
         </div>
-      </section>
 
-      <!-- PREVIEW -->
-      <section class="card">
-        <div class="hd"><b>Preview (@2x)</b></div>
+        <div class="dockGroup">
+          <div class="miniLabel">tools</div>
+          <button class="icoBtn" type="button" title="Update preview" id="forcePreviewBtn">
+            <span aria-hidden="true">↻</span>
+            <span class="tip">Update preview</span>
+          </button>
+        </div>
+      </aside>
 
-        <div class="bd preview">
-          <div class="previewSplit">
-            <div class="pv">
-              <div class="pvh">
-                <div class="t">Score</div>
-                <div class="s" id="infoScore">—</div>
-              </div>
-              <div class="pvb"><div class="thumbs score" id="pvScore"></div></div>
+      <!-- MAIN -->
+      <main class="main">
+
+        <!-- SETTINGS CARD -->
+        <section class="card" id="settingsCard">
+          <div class="cardHead">
+            <div class="tools">
+              <span class="badge">Settings</span>
             </div>
-
-            <div class="pv">
-              <div class="pvh">
-                <div class="t">Combo</div>
-                <div class="s" id="infoCombo">—</div>
-              </div>
-              <div class="pvb"><div class="thumbs combo" id="pvCombo"></div></div>
+            <div class="tools">
+              <button class="btn" type="button" id="miniUpdateBtn">Refresh</button>
             </div>
           </div>
 
-          <div class="sub">ZIP includes normal 1x + scoreentry (21×28 @2x).</div>
-        </div>
-      </section>
+          <div class="cardBody">
+            <div class="row2">
+              <div>
+                <label>Score prefix</label>
+                <input id="scorePrefix" type="text" value="score-" />
+              </div>
+              <div>
+                <label>Combo prefix</label>
+                <input id="comboPrefix" type="text" value="mania-combo-" />
+              </div>
+            </div>
+
+            <div class="row2" style="margin-top:10px;">
+              <div>
+                <label>Scoreentry prefix</label>
+                <input id="scoreEntryPrefix" type="text" value="scoreentry-" />
+              </div>
+              <div>
+                <label>Scoreentry size</label>
+                <input id="scoreEntrySize" type="number" min="1" step="1" value="20" />
+              </div>
+            </div>
+
+            <div class="row2" style="margin-top:10px;">
+              <div>
+                <label>Score font</label>
+                <input id="scoreFont" type="file" accept=".ttf,.otf" />
+              </div>
+              <div>
+                <label>Combo font</label>
+                <input id="comboFont" type="file" accept=".ttf,.otf" />
+              </div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="row2">
+              <div>
+                <label>Img size (score/combo)</label>
+                <div class="row2" style="gap:8px">
+                  <input id="nW" type="number" min="1" step="1" value="44" />
+                  <input id="nH" type="number" min="1" step="1" value="66" />
+                </div>
+              </div>
+              <div>
+                <label>Dot/Comma/X tweak</label>
+                <div class="row2" style="gap:8px">
+                  <input id="dotXExtraY" type="number" step="1" value="3" />
+                  <input id="centerBias" type="number" step="0.01" value="1.00" />
+                </div>
+                <div class="hint">extraY • bias</div>
+              </div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="row2">
+              <div>
+                <label>Score size / color</label>
+                <div class="row2" style="gap:8px">
+                  <input id="scoreSize" type="number" min="1" step="1" value="52" />
+                  <input id="scoreColor" type="text" value="#FFFFFF" />
+                </div>
+              </div>
+
+              <div>
+                <label>Combo size / color</label>
+                <div class="row2" style="gap:8px">
+                  <input id="comboSize" type="number" min="1" step="1" value="52" />
+                  <input id="comboColor" type="text" value="#FFFFFF" />
+                </div>
+              </div>
+            </div>
+
+            <div class="row2" style="margin-top:10px;">
+              <div class="chk">
+                <input id="entryTransparentPercent" type="checkbox" checked />
+                <span>scoreentry-percent (transparent)</span>
+              </div>
+              <div class="chk">
+                <input id="entryTransparentX" type="checkbox" />
+                <span>scoreentry-x (transparent)</span>
+              </div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="statusLine" id="statusMirror">
+              Status: <b>ready</b>.
+            </div>
+          </div>
+        </section>
+
+        <!-- PREVIEW CARD -->
+        <section class="card" id="previewCard">
+          <div class="cardHead">
+            <div class="tools">
+              <span class="badge">Preview (@2x)</span>
+            </div>
+            <div class="tools">
+              <span class="badge" id="infoScore">—</span>
+              <span class="badge" id="infoCombo">—</span>
+            </div>
+          </div>
+
+          <div class="cardBody" style="display:flex; flex-direction:column; gap:10px; min-height:0;">
+            <div class="previewSplit">
+              <div class="pv">
+                <div class="pvh">
+                  <div class="t">Score</div>
+                  <div class="s" id="infoScore2">—</div>
+                </div>
+                <div class="pvb"><div class="thumbs score" id="pvScore"></div></div>
+              </div>
+
+              <div class="pv">
+                <div class="pvh">
+                  <div class="t">Combo</div>
+                  <div class="s" id="infoCombo2">—</div>
+                </div>
+                <div class="pvb"><div class="thumbs combo" id="pvCombo"></div></div>
+              </div>
+            </div>
+
+            <div class="hint">ZIP includes normal 1x + scoreentry (21×28 @2x).</div>
+          </div>
+        </section>
+
+      </main>
     </div>
   </div>
 
@@ -453,13 +716,24 @@
     pvCombo: $('pvCombo'),
     infoScore: $('infoScore'),
     infoCombo: $('infoCombo'),
+
+    // extra mirrors for the new layout
+    statusMirror: $('statusMirror'),
+    infoScore2: $('infoScore2'),
+    infoCombo2: $('infoCombo2'),
+    miniUpdateBtn: $('miniUpdateBtn'),
+    forcePreviewBtn: $('forcePreviewBtn'),
   };
 
   let fontScore = 'sans-serif';
   let fontCombo = 'sans-serif';
 
   const makeCanvas = (w,h) => { const c=document.createElement('canvas'); c.width=w; c.height=h; return c; };
-  const setStatus = (t) => el.status.innerHTML = `Status: <b>${t}</b>.`;
+  const setStatus = (t) => {
+    const html = `Status: <b>${t}</b>.`;
+    if(el.status) el.status.innerHTML = html;
+    if(el.statusMirror) el.statusMirror.innerHTML = html;
+  };
   const sanitizePrefix = (p) => (p||'').trim();
 
   async function loadFontFromFile(file, base){
@@ -478,9 +752,7 @@
 
   function clear(ctx,w,h){ ctx.clearRect(0,0,w,h); }
 
-  // FIX: robust bbox centering that stays correct across fonts, including dot/comma/x.
-  // We compute baseline from (ascent+descent) and we can apply a "centerBias"
-  // (useful because some fonts report tiny bbox for '.' and it visually sits high).
+  // robust bbox centering
   function drawBBoxCentered(ctx, text, w, h, family, size, color, extraY, centerBias){
     ctx.save();
     ctx.font = `${size}px "${family}", sans-serif`;
@@ -492,11 +764,7 @@
     const asc = (m.actualBoundingBoxAscent ?? size*0.8);
     const desc = (m.actualBoundingBoxDescent ?? size*0.2);
 
-    // baseline that centers the glyph bbox vertically
     let baseline = (h - (asc + desc)) / 2 + asc;
-
-    // bias pushes baseline toward visual center for tiny glyphs (dot/comma/x),
-    // without breaking other glyphs
     baseline = (h/2) + (baseline - h/2) * centerBias;
 
     ctx.fillText(text, w/2, baseline + extraY);
@@ -588,7 +856,6 @@
       const ctx2 = c2.getContext('2d');
       clear(ctx2,W2,H2);
 
-      // scoreentry-comma must be dot artwork
       const drawChar = (key === 'comma') ? '.' : g;
       drawBBoxCentered(ctx2, drawChar, W2, H2, family, size, color, extra, isDotLike ? centerBias : 1.0);
 
@@ -639,8 +906,11 @@
     fillPreview(el.pvScore, score.normal2x);
     fillPreview(el.pvCombo, combo.normal2x);
 
-    el.infoScore.textContent = `${nW}×${nH}`;
-    el.infoCombo.textContent = `${nW}×${nH}`;
+    const info = `${nW}×${nH}`;
+    if(el.infoScore) el.infoScore.textContent = info;
+    if(el.infoCombo) el.infoCombo.textContent = info;
+    if(el.infoScore2) el.infoScore2.textContent = info;
+    if(el.infoCombo2) el.infoCombo2.textContent = info;
 
     return {score, combo};
   }
@@ -696,6 +966,8 @@
 
       const zip = new JSZip();
       const normal = zip.folder('normal');
+
+      const canvasToBlob = (c) => new Promise(res => c.toBlob(res,'image/png'));
 
       for(const [name, canvas] of score.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
       for(const [name, canvas] of score.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
@@ -755,6 +1027,10 @@
   $('comboFont').addEventListener('change', schedulePreview);
   $('entryTransparentPercent').addEventListener('change', schedulePreview);
   $('entryTransparentX').addEventListener('change', schedulePreview);
+
+  // extra "refresh" buttons from the new UI
+  if(el.miniUpdateBtn) el.miniUpdateBtn.addEventListener('click', schedulePreview);
+  if(el.forcePreviewBtn) el.forcePreviewBtn.addEventListener('click', schedulePreview);
 
   (async () => {
     try{

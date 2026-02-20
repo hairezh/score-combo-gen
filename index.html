@@ -319,7 +319,7 @@
       margin-bottom:6px;
     }
 
-    input[type="text"], input[type="number"]{
+    input[type="text"], input[type="number"], select{
       width:100%;
       border:1px solid rgba(255,255,255,.12);
       border-radius:14px;
@@ -328,6 +328,11 @@
       padding: var(--inputPadY) var(--inputPadX);
       outline:none;
       font:inherit;
+    }
+
+    input[type="range"]{
+      width:100%;
+      accent-color: rgba(233,233,238,.85);
     }
 
     input[type="file"]{
@@ -451,6 +456,31 @@
       font-weight:900;
     }
 
+    /* ===== NEW: Advanced typography helpers ===== */
+    details.adv{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      border-radius:14px;
+      padding:10px;
+    }
+    details.adv > summary{
+      cursor:pointer;
+      font-weight:900;
+      color: rgba(233,233,238,.92);
+      user-select:none;
+      list-style:none;
+      margin-bottom:10px;
+    }
+    details.adv > summary::-webkit-details-marker{ display:none; }
+
+    .rangeRow{
+      display:grid;
+      grid-template-columns: 1fr 92px;
+      gap:8px;
+      align-items:center;
+    }
+    .rangeRow input[type="number"]{ text-align:center; }
+
     @media (max-width: 980px){
       body{ overflow:auto; }
       .layout{ grid-template-columns: 1fr; }
@@ -477,7 +507,6 @@
 <body>
   <div class="app">
 
-    <!-- TOPBAR (igual do primeiro) -->
     <div class="topbar">
       <div class="brand">
         <img alt="icon" src="https://i.pinimg.com/originals/da/b4/cb/dab4cbf31e4e8d7688b0e830d5d640f1.gif">
@@ -494,7 +523,6 @@
     </div>
 
     <div class="layout">
-      <!-- DOCK (visual do primeiro) -->
       <aside class="dock">
         <div class="dockGroup">
           <button class="icoBtn active" type="button" title="Settings">
@@ -517,10 +545,8 @@
         </div>
       </aside>
 
-      <!-- MAIN -->
       <main class="main">
 
-        <!-- SETTINGS CARD -->
         <section class="card" id="settingsCard">
           <div class="cardHead">
             <div class="tools">
@@ -616,6 +642,217 @@
               </div>
             </div>
 
+            <!-- NEW: Render engine + Advanced Typography -->
+            <div class="sep"></div>
+
+            <div class="row2">
+              <div>
+                <label>Render engine</label>
+                <select id="renderEngine">
+                  <option value="canvas" selected>Canvas (fast)</option>
+                  <option value="svg">SVG (variable fonts full)</option>
+                </select>
+                <div class="hint">SVG enables opsz/GRAD/ROND via font-variation-settings.</div>
+              </div>
+              <div>
+                <label>Digits</label>
+                <select id="digitsMode">
+                  <option value="default" selected>Default</option>
+                  <option value="tnum">Tabular (tnum)</option>
+                  <option value="pnum">Proportional (pnum)</option>
+                  <option value="lnum">Lining (lnum)</option>
+                  <option value="onum">Oldstyle (onum)</option>
+                </select>
+                <div class="hint">Only affects fonts that support these OpenType features.</div>
+              </div>
+            </div>
+
+            <div style="margin-top:10px;">
+              <details class="adv" open>
+                <summary>Advanced Typography (Score)</summary>
+
+                <div class="row2">
+                  <div>
+                    <label>Style</label>
+                    <select id="scoreStyle">
+                      <option value="normal" selected>Normal</option>
+                      <option value="italic">Italic</option>
+                      <option value="oblique">Oblique (uses Slant)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Baseline shift (px)</label>
+                    <input id="scoreBaseline" type="number" step="1" value="0" />
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Optical Size (opsz)</label>
+                    <div class="rangeRow">
+                      <input id="scoreOpsz" type="range" min="8" max="144" step="1" value="14" />
+                      <input id="scoreOpszN" type="number" min="8" max="144" step="1" value="14" />
+                    </div>
+                  </div>
+                  <div>
+                    <label>Width (wdth %)</label>
+                    <div class="rangeRow">
+                      <input id="scoreWdth" type="range" min="50" max="200" step="1" value="100" />
+                      <input id="scoreWdthN" type="number" min="50" max="200" step="1" value="100" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Weight (wght)</label>
+                    <div class="rangeRow">
+                      <input id="scoreWght" type="range" min="1" max="1000" step="1" value="400" />
+                      <input id="scoreWghtN" type="number" min="1" max="1000" step="1" value="400" />
+                    </div>
+                  </div>
+                  <div>
+                    <label>Grade (GRAD)</label>
+                    <div class="rangeRow">
+                      <input id="scoreGrad" type="range" min="-200" max="200" step="1" value="0" />
+                      <input id="scoreGradN" type="number" min="-200" max="200" step="1" value="0" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Roundness (ROND)</label>
+                    <div class="rangeRow">
+                      <input id="scoreRond" type="range" min="0" max="100" step="1" value="0" />
+                      <input id="scoreRondN" type="number" min="0" max="100" step="1" value="0" />
+                    </div>
+                  </div>
+                  <div>
+                    <label>Slant (deg)</label>
+                    <div class="rangeRow">
+                      <input id="scoreSlnt" type="range" min="-20" max="20" step="1" value="0" />
+                      <input id="scoreSlntN" type="number" min="-20" max="20" step="1" value="0" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Scale X (%)</label>
+                    <input id="scoreScaleX" type="number" min="10" max="300" step="1" value="100" />
+                  </div>
+                  <div>
+                    <label>Scale Y (%)</label>
+                    <input id="scoreScaleY" type="number" min="10" max="300" step="1" value="100" />
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Tracking (px)</label>
+                    <input id="scoreTracking" type="number" step="0.1" value="0" />
+                  </div>
+                  <div class="hint" style="margin:0; align-self:end;">
+                    Tracking matters mostly if you ever draw multi-char strings.
+                  </div>
+                </div>
+              </details>
+            </div>
+
+            <div style="margin-top:10px;">
+              <details class="adv" open>
+                <summary>Advanced Typography (Combo)</summary>
+
+                <div class="row2">
+                  <div>
+                    <label>Style</label>
+                    <select id="comboStyle">
+                      <option value="normal" selected>Normal</option>
+                      <option value="italic">Italic</option>
+                      <option value="oblique">Oblique (uses Slant)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Baseline shift (px)</label>
+                    <input id="comboBaseline" type="number" step="1" value="0" />
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Optical Size (opsz)</label>
+                    <div class="rangeRow">
+                      <input id="comboOpsz" type="range" min="8" max="144" step="1" value="14" />
+                      <input id="comboOpszN" type="number" min="8" max="144" step="1" value="14" />
+                    </div>
+                  </div>
+                  <div>
+                    <label>Width (wdth %)</label>
+                    <div class="rangeRow">
+                      <input id="comboWdth" type="range" min="50" max="200" step="1" value="100" />
+                      <input id="comboWdthN" type="number" min="50" max="200" step="1" value="100" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Weight (wght)</label>
+                    <div class="rangeRow">
+                      <input id="comboWght" type="range" min="1" max="1000" step="1" value="400" />
+                      <input id="comboWghtN" type="number" min="1" max="1000" step="1" value="400" />
+                    </div>
+                  </div>
+                  <div>
+                    <label>Grade (GRAD)</label>
+                    <div class="rangeRow">
+                      <input id="comboGrad" type="range" min="-200" max="200" step="1" value="0" />
+                      <input id="comboGradN" type="number" min="-200" max="200" step="1" value="0" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Roundness (ROND)</label>
+                    <div class="rangeRow">
+                      <input id="comboRond" type="range" min="0" max="100" step="1" value="0" />
+                      <input id="comboRondN" type="number" min="0" max="100" step="1" value="0" />
+                    </div>
+                  </div>
+                  <div>
+                    <label>Slant (deg)</label>
+                    <div class="rangeRow">
+                      <input id="comboSlnt" type="range" min="-20" max="20" step="1" value="0" />
+                      <input id="comboSlntN" type="number" min="-20" max="20" step="1" value="0" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Scale X (%)</label>
+                    <input id="comboScaleX" type="number" min="10" max="300" step="1" value="100" />
+                  </div>
+                  <div>
+                    <label>Scale Y (%)</label>
+                    <input id="comboScaleY" type="number" min="10" max="300" step="1" value="100" />
+                  </div>
+                </div>
+
+                <div class="row2" style="margin-top:10px;">
+                  <div>
+                    <label>Tracking (px)</label>
+                    <input id="comboTracking" type="number" step="0.1" value="0" />
+                  </div>
+                  <div class="hint" style="margin:0; align-self:end;">
+                    Tracking matters mostly if you ever draw multi-char strings.
+                  </div>
+                </div>
+              </details>
+            </div>
+
             <div class="sep"></div>
 
             <div class="statusLine" id="statusMirror">
@@ -624,7 +861,6 @@
           </div>
         </section>
 
-        <!-- PREVIEW CARD -->
         <section class="card" id="previewCard">
           <div class="cardHead">
             <div class="tools">
@@ -717,16 +953,44 @@
     infoScore: $('infoScore'),
     infoCombo: $('infoCombo'),
 
-    // extra mirrors for the new layout
     statusMirror: $('statusMirror'),
     infoScore2: $('infoScore2'),
     infoCombo2: $('infoCombo2'),
     miniUpdateBtn: $('miniUpdateBtn'),
     forcePreviewBtn: $('forcePreviewBtn'),
+
+    // NEW
+    renderEngine: $('renderEngine'),
+    digitsMode: $('digitsMode'),
+
+    scoreStyle: $('scoreStyle'),
+    scoreBaseline: $('scoreBaseline'),
+    scoreOpszN: $('scoreOpszN'),
+    scoreWdthN: $('scoreWdthN'),
+    scoreWghtN: $('scoreWghtN'),
+    scoreGradN: $('scoreGradN'),
+    scoreRondN: $('scoreRondN'),
+    scoreSlntN: $('scoreSlntN'),
+    scoreScaleX: $('scoreScaleX'),
+    scoreScaleY: $('scoreScaleY'),
+    scoreTracking: $('scoreTracking'),
+
+    comboStyle: $('comboStyle'),
+    comboBaseline: $('comboBaseline'),
+    comboOpszN: $('comboOpszN'),
+    comboWdthN: $('comboWdthN'),
+    comboWghtN: $('comboWghtN'),
+    comboGradN: $('comboGradN'),
+    comboRondN: $('comboRondN'),
+    comboSlntN: $('comboSlntN'),
+    comboScaleX: $('comboScaleX'),
+    comboScaleY: $('comboScaleY'),
+    comboTracking: $('comboTracking'),
   };
 
-  let fontScore = 'sans-serif';
-  let fontCombo = 'sans-serif';
+  // keep both family and url (url used by SVG engine)
+  let fontScore = { family: 'sans-serif', url: null };
+  let fontCombo = { family: 'sans-serif', url: null };
 
   const makeCanvas = (w,h) => { const c=document.createElement('canvas'); c.width=w; c.height=h; return c; };
   const setStatus = (t) => {
@@ -737,7 +1001,7 @@
   const sanitizePrefix = (p) => (p||'').trim();
 
   async function loadFontFromFile(file, base){
-    if(!file) return 'sans-serif';
+    if(!file) return { family:'sans-serif', url:null };
     const ab = await file.arrayBuffer();
     const blob = new Blob([ab], {type:"font/ttf"});
     const url = URL.createObjectURL(blob);
@@ -745,31 +1009,12 @@
     const ff = new FontFace(family, `url(${url})`);
     await ff.load();
     document.fonts.add(ff);
-    return family;
+    return { family, url };
   }
 
   const canvasToBlob = (c) => new Promise(res => c.toBlob(res,'image/png'));
 
   function clear(ctx,w,h){ ctx.clearRect(0,0,w,h); }
-
-  // robust bbox centering
-  function drawBBoxCentered(ctx, text, w, h, family, size, color, extraY, centerBias){
-    ctx.save();
-    ctx.font = `${size}px "${family}", sans-serif`;
-    ctx.fillStyle = color;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-
-    const m = ctx.measureText(text);
-    const asc = (m.actualBoundingBoxAscent ?? size*0.8);
-    const desc = (m.actualBoundingBoxDescent ?? size*0.2);
-
-    let baseline = (h - (asc + desc)) / 2 + asc;
-    baseline = (h/2) + (baseline - h/2) * centerBias;
-
-    ctx.fillText(text, w/2, baseline + extraY);
-    ctx.restore();
-  }
 
   function downscale(src, w, h){
     const out = makeCanvas(w,h);
@@ -799,7 +1044,176 @@
     }
   }
 
-  function renderNormal({prefix, family, size, color, nW, nH, glyphs, keyForGlyph, dotXExtraY, centerBias}){
+  // ===== NEW: slider sync helper =====
+  function bindRange(rangeId, numberId){
+    const r = $(rangeId), n = $(numberId);
+    if(!r || !n) return;
+    const clampIntoRange = () => {
+      const v = parseFloat(n.value);
+      const mn = parseFloat(r.min);
+      const mx = parseFloat(r.max);
+      const vv = Math.max(mn, Math.min(mx, isFinite(v) ? v : mn));
+      n.value = vv;
+      r.value = vv;
+    };
+    r.addEventListener('input', () => { n.value = r.value; schedulePreview(); });
+    n.addEventListener('input', () => { clampIntoRange(); schedulePreview(); });
+    clampIntoRange();
+  }
+
+  // ===== NEW: typography getters =====
+  function getDigitsFeatures(mode){
+    // used mostly by SVG engine; canvas support is spotty
+    if(mode === 'tnum') return `"tnum" 1`;
+    if(mode === 'pnum') return `"pnum" 1`;
+    if(mode === 'lnum') return `"lnum" 1`;
+    if(mode === 'onum') return `"onum" 1`;
+    return '';
+  }
+
+  function getTypo(kind){
+    const isScore = kind === 'score';
+    const styleSel = isScore ? el.scoreStyle.value : el.comboStyle.value;
+
+    const slantDeg = parseFloat(isScore ? el.scoreSlntN.value : el.comboSlntN.value) || 0;
+    const style =
+      styleSel === 'italic' ? 'italic' :
+      styleSel === 'oblique' ? `oblique ${slantDeg}deg` :
+      'normal';
+
+    const t = {
+      style,
+      slantDeg,
+      opsz: parseFloat(isScore ? el.scoreOpszN.value : el.comboOpszN.value) || 14,
+      wdth: parseFloat(isScore ? el.scoreWdthN.value : el.comboWdthN.value) || 100,
+      wght: parseFloat(isScore ? el.scoreWghtN.value : el.comboWghtN.value) || 400,
+      grad: parseFloat(isScore ? el.scoreGradN.value : el.comboGradN.value) || 0,
+      rond: parseFloat(isScore ? el.scoreRondN.value : el.comboRondN.value) || 0,
+      scaleX: (parseFloat(isScore ? el.scoreScaleX.value : el.comboScaleX.value) || 100) / 100,
+      scaleY: (parseFloat(isScore ? el.scoreScaleY.value : el.comboScaleY.value) || 100) / 100,
+      baseline: parseFloat(isScore ? el.scoreBaseline.value : el.comboBaseline.value) || 0,
+      tracking: parseFloat(isScore ? el.scoreTracking.value : el.comboTracking.value) || 0,
+      digitsFeatures: getDigitsFeatures(el.digitsMode.value)
+    };
+    // keep things sane
+    t.wdth = Math.max(1, Math.min(1000, t.wdth));
+    t.wght = Math.max(1, Math.min(1000, t.wght));
+    t.scaleX = Math.max(0.1, Math.min(5, t.scaleX));
+    t.scaleY = Math.max(0.1, Math.min(5, t.scaleY));
+    return t;
+  }
+
+  // ===== Canvas engine drawing =====
+  function drawBBoxCenteredCanvas(ctx, text, w, h, family, size, color, extraY, centerBias, typo){
+    ctx.save();
+
+    const stretch = `${typo.wdth}%`;
+    ctx.font = `${typo.style} normal ${typo.wght} ${stretch} ${size}px "${family}", sans-serif`;
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+
+    const m = ctx.measureText(text);
+    const asc = (m.actualBoundingBoxAscent ?? size*0.8);
+    const desc = (m.actualBoundingBoxDescent ?? size*0.2);
+
+    let baseline = (h - (asc + desc)) / 2 + asc;
+    baseline = (h/2) + (baseline - h/2) * centerBias;
+
+    // scale around center (x/y)
+    ctx.translate(w/2, h/2);
+    ctx.scale(typo.scaleX, typo.scaleY);
+    ctx.translate(-w/2, -h/2);
+
+    ctx.fillText(text, w/2, baseline + extraY + typo.baseline);
+    ctx.restore();
+  }
+
+  // ===== SVG engine drawing (supports font-variation-settings) =====
+  function bboxFromAlpha(ctx, w, h, thr=1){
+    const img = ctx.getImageData(0,0,w,h).data;
+    let minX=w, minY=h, maxX=-1, maxY=-1;
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const a = img[(y*w+x)*4+3];
+        if(a>thr){
+          if(x<minX) minX=x;
+          if(y<minY) minY=y;
+          if(x>maxX) maxX=x;
+          if(y>maxY) maxY=y;
+        }
+      }
+    }
+    if(maxX<0) return null;
+    return {minX,minY,maxX,maxY};
+  }
+
+  async function renderGlyphSVG({w,h,text,font,family,size,color,typo,centerBias,extraY}){
+    const sx = typo.scaleX, sy = typo.scaleY;
+
+    const fontFaceCSS = font?.url
+      ? `@font-face { font-family: "${family}"; src: url("${font.url}"); }`
+      : '';
+
+    // Variation settings: browsers ignore axes not present in the font.
+    const variation = `"wght" ${typo.wght}, "wdth" ${typo.wdth}, "opsz" ${typo.opsz}, "GRAD" ${typo.grad}, "ROND" ${typo.rond}, "slnt" ${typo.slantDeg}`;
+
+    const feature = typo.digitsFeatures ? `font-feature-settings: ${typo.digitsFeatures};` : '';
+    const tracking = typo.tracking ? `letter-spacing: ${typo.tracking}px;` : '';
+
+    const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <style>
+    ${fontFaceCSS}
+    text{
+      font-family:"${family}", sans-serif;
+      font-size:${size}px;
+      fill:${color};
+      font-variation-settings: ${variation};
+      ${feature}
+      ${tracking}
+      font-style: ${typo.style.includes('oblique') ? 'oblique' : typo.style};
+    }
+  </style>
+  <g transform="translate(${w/2} ${h/2}) scale(${sx} ${sy}) translate(${-w/2} ${-h/2})">
+    <text x="${w/2}" y="${h/2}" text-anchor="middle" dominant-baseline="central">${String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</text>
+  </g>
+</svg>`;
+
+    const blob = new Blob([svg], {type:'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = url;
+    await img.decode();
+
+    const tmp = makeCanvas(w,h);
+    const tctx = tmp.getContext('2d');
+    tctx.clearRect(0,0,w,h);
+    tctx.drawImage(img,0,0);
+    URL.revokeObjectURL(url);
+
+    const bb = bboxFromAlpha(tctx, w, h, 1);
+    if(!bb){
+      return makeCanvas(w,h);
+    }
+
+    const cx = (bb.minX + bb.maxX + 1) / 2;
+    const cy = (bb.minY + bb.maxY + 1) / 2;
+
+    // centerBias multiplies the correction (mainly useful for dot/x)
+    const dx = (w/2) - cx;
+    const dy = ((h/2) - cy) * centerBias + extraY + typo.baseline;
+
+    const out = makeCanvas(w,h);
+    const octx = out.getContext('2d');
+    octx.clearRect(0,0,w,h);
+    octx.drawImage(tmp, dx, dy);
+    return out;
+  }
+
+  async function renderNormalAsync({prefix, fontObj, size, color, nW, nH, glyphs, keyForGlyph, dotXExtraY, centerBias, typo, engine}){
     const pref = sanitizePrefix(prefix);
 
     const normal2x = new Map();
@@ -811,12 +1225,28 @@
       const isDotLike = (key === 'dot' || key === 'comma' || key === 'x');
       const extra = isDotLike ? dotXExtraY : 0;
 
-      const c2 = makeCanvas(nW,nH);
-      const ctx2 = c2.getContext('2d');
-      clear(ctx2,nW,nH);
+      let c2;
 
       const drawChar = drawCharForKey(key, g);
-      drawBBoxCentered(ctx2, drawChar, nW, nH, family, size, color, extra, isDotLike ? centerBias : 1.0);
+
+      if(engine === 'svg'){
+        c2 = await renderGlyphSVG({
+          w:nW, h:nH,
+          text:drawChar,
+          font:fontObj,
+          family:fontObj.family,
+          size,
+          color,
+          typo,
+          centerBias: isDotLike ? centerBias : 1.0,
+          extraY: extra
+        });
+      }else{
+        c2 = makeCanvas(nW,nH);
+        const ctx2 = c2.getContext('2d');
+        clear(ctx2,nW,nH);
+        drawBBoxCenteredCanvas(ctx2, drawChar, nW, nH, fontObj.family, size, color, extra, isDotLike ? centerBias : 1.0, typo);
+      }
 
       const c1 = downscale(c2, Math.max(1, Math.round(nW/2)), Math.max(1, Math.round(nH/2)));
 
@@ -827,7 +1257,7 @@
     return { normal2x, normal1x };
   }
 
-  function renderScoreEntry({prefix, family, size, color, includeTransparentPercent, transparentX, dotXExtraY, centerBias}){
+  async function renderScoreEntryAsync({prefix, fontObj, size, color, includeTransparentPercent, transparentX, dotXExtraY, centerBias, typo, engine}){
     const pref = sanitizePrefix(prefix);
 
     const W2 = 21, H2 = 28;
@@ -852,12 +1282,27 @@
         continue;
       }
 
-      const c2 = makeCanvas(W2,H2);
-      const ctx2 = c2.getContext('2d');
-      clear(ctx2,W2,H2);
-
       const drawChar = (key === 'comma') ? '.' : g;
-      drawBBoxCentered(ctx2, drawChar, W2, H2, family, size, color, extra, isDotLike ? centerBias : 1.0);
+
+      let c2;
+      if(engine === 'svg'){
+        c2 = await renderGlyphSVG({
+          w:W2, h:H2,
+          text:drawChar,
+          font:fontObj,
+          family:fontObj.family,
+          size,
+          color,
+          typo,
+          centerBias: isDotLike ? centerBias : 1.0,
+          extraY: extra
+        });
+      }else{
+        c2 = makeCanvas(W2,H2);
+        const ctx2 = c2.getContext('2d');
+        clear(ctx2,W2,H2);
+        drawBBoxCenteredCanvas(ctx2, drawChar, W2, H2, fontObj.family, size, color, extra, isDotLike ? centerBias : 1.0, typo);
+      }
 
       const c1 = downscale(c2, W1, H1);
       normal2x.set(`${pref}${key}@2x.png`, c2);
@@ -874,33 +1319,42 @@
     setStatus('fonts ready');
   }
 
-  function renderPreview(){
+  async function renderPreview(){
+    const engine = el.renderEngine.value;
+
     const nW = Math.max(1, parseInt(el.nW.value||'44',10));
     const nH = Math.max(1, parseInt(el.nH.value||'66',10));
     const dotXExtraY = parseInt(el.dotXExtraY.value||'0',10);
     const centerBias = Math.max(0, Math.min(2, parseFloat(el.centerBias.value||'1')));
 
-    const score = renderNormal({
+    const scoreTypo = getTypo('score');
+    const comboTypo = getTypo('combo');
+
+    const score = await renderNormalAsync({
       prefix: el.scorePrefix.value,
-      family: fontScore,
+      fontObj: fontScore,
       size: parseInt(el.scoreSize.value||'52',10),
       color: (el.scoreColor.value||'#fff').trim(),
       nW, nH,
       glyphs: SCORE_GLYPHS,
       keyForGlyph: scoreKeyForGlyph,
       dotXExtraY,
-      centerBias
+      centerBias,
+      typo: scoreTypo,
+      engine
     });
 
-    const combo = renderNormal({
+    const combo = await renderNormalAsync({
       prefix: el.comboPrefix.value,
-      family: fontCombo,
+      fontObj: fontCombo,
       size: parseInt(el.comboSize.value||'52',10),
       color: (el.comboColor.value||'#fff').trim(),
       nW, nH,
       glyphs: COMBO_GLYPHS,
       dotXExtraY,
-      centerBias
+      centerBias,
+      typo: comboTypo,
+      engine
     });
 
     fillPreview(el.pvScore, score.normal2x);
@@ -925,49 +1379,58 @@
       await ensureFonts();
       setStatus('rendering');
 
+      const engine = el.renderEngine.value;
+
       const nW = Math.max(1, parseInt(el.nW.value||'44',10));
       const nH = Math.max(1, parseInt(el.nH.value||'66',10));
       const dotXExtraY = parseInt(el.dotXExtraY.value||'0',10);
       const centerBias = Math.max(0, Math.min(2, parseFloat(el.centerBias.value||'1')));
 
-      const score = renderNormal({
+      const scoreTypo = getTypo('score');
+      const comboTypo = getTypo('combo');
+
+      const score = await renderNormalAsync({
         prefix: el.scorePrefix.value,
-        family: fontScore,
+        fontObj: fontScore,
         size: parseInt(el.scoreSize.value||'52',10),
         color: (el.scoreColor.value||'#fff').trim(),
         nW, nH,
         glyphs: SCORE_GLYPHS,
         keyForGlyph: scoreKeyForGlyph,
         dotXExtraY,
-        centerBias
+        centerBias,
+        typo: scoreTypo,
+        engine
       });
 
-      const combo = renderNormal({
+      const combo = await renderNormalAsync({
         prefix: el.comboPrefix.value,
-        family: fontCombo,
+        fontObj: fontCombo,
         size: parseInt(el.comboSize.value||'52',10),
         color: (el.comboColor.value||'#fff').trim(),
         nW, nH,
         glyphs: COMBO_GLYPHS,
         dotXExtraY,
-        centerBias
+        centerBias,
+        typo: comboTypo,
+        engine
       });
 
-      const entry = renderScoreEntry({
+      const entry = await renderScoreEntryAsync({
         prefix: el.scoreEntryPrefix.value,
-        family: fontScore,
+        fontObj: fontScore,
         size: parseInt(el.scoreEntrySize.value||'20',10),
         color: (el.scoreColor.value||'#fff').trim(),
         includeTransparentPercent: !!el.entryTransparentPercent.checked,
         transparentX: !!el.entryTransparentX.checked,
         dotXExtraY,
-        centerBias
+        centerBias,
+        typo: scoreTypo,
+        engine
       });
 
       const zip = new JSZip();
       const normal = zip.folder('normal');
-
-      const canvasToBlob = (c) => new Promise(res => c.toBlob(res,'image/png'));
 
       for(const [name, canvas] of score.normal2x.entries()) normal.file(name, await canvasToBlob(canvas));
       for(const [name, canvas] of score.normal1x.entries()) normal.file(name, await canvasToBlob(canvas));
@@ -1002,7 +1465,7 @@
     debounceT = setTimeout(async () => {
       try{
         await ensureFonts();
-        renderPreview();
+        await renderPreview();
         setStatus('preview updated');
       }catch(e){
         console.error(e);
@@ -1013,6 +1476,21 @@
 
   el.btnDownload.addEventListener('click', downloadArchives);
 
+  // bind new slider pairs
+  bindRange('scoreOpsz','scoreOpszN');
+  bindRange('scoreWdth','scoreWdthN');
+  bindRange('scoreWght','scoreWghtN');
+  bindRange('scoreGrad','scoreGradN');
+  bindRange('scoreRond','scoreRondN');
+  bindRange('scoreSlnt','scoreSlntN');
+
+  bindRange('comboOpsz','comboOpszN');
+  bindRange('comboWdth','comboWdthN');
+  bindRange('comboWght','comboWghtN');
+  bindRange('comboGrad','comboGradN');
+  bindRange('comboRond','comboRondN');
+  bindRange('comboSlnt','comboSlntN');
+
   const watch = [
     'scorePrefix','comboPrefix','scoreEntryPrefix',
     'scoreFont','comboFont',
@@ -1020,22 +1498,40 @@
     'dotXExtraY','centerBias',
     'scoreSize','scoreColor',
     'comboSize','comboColor',
-    'scoreEntrySize'
+    'scoreEntrySize',
+    'entryTransparentPercent','entryTransparentX',
+    'miniUpdateBtn','forcePreviewBtn',
+    // NEW
+    'renderEngine','digitsMode',
+    'scoreStyle','scoreBaseline','scoreScaleX','scoreScaleY','scoreTracking',
+    'comboStyle','comboBaseline','comboScaleX','comboScaleY','comboTracking'
   ];
-  watch.forEach(id => $(id).addEventListener('input', schedulePreview));
+
+  // wire events
+  [
+    'scorePrefix','comboPrefix','scoreEntryPrefix',
+    'nW','nH',
+    'dotXExtraY','centerBias',
+    'scoreSize','scoreColor',
+    'comboSize','comboColor',
+    'scoreEntrySize',
+    'renderEngine','digitsMode',
+    'scoreStyle','scoreBaseline','scoreScaleX','scoreScaleY','scoreTracking',
+    'comboStyle','comboBaseline','comboScaleX','comboScaleY','comboTracking',
+  ].forEach(id => $(id).addEventListener('input', schedulePreview));
+
   $('scoreFont').addEventListener('change', schedulePreview);
   $('comboFont').addEventListener('change', schedulePreview);
   $('entryTransparentPercent').addEventListener('change', schedulePreview);
   $('entryTransparentX').addEventListener('change', schedulePreview);
 
-  // extra "refresh" buttons from the new UI
   if(el.miniUpdateBtn) el.miniUpdateBtn.addEventListener('click', schedulePreview);
   if(el.forcePreviewBtn) el.forcePreviewBtn.addEventListener('click', schedulePreview);
 
   (async () => {
     try{
       await ensureFonts();
-      renderPreview();
+      await renderPreview();
       setStatus('ready');
     }catch(e){
       setStatus('ready');
